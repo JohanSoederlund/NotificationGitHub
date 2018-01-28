@@ -1,6 +1,6 @@
 using System;
 
-namespace Quiz.Models
+namespace NotificationHub.Models
 {
     public class ErrorViewModel
     {

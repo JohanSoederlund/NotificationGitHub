@@ -4,9 +4,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Quiz.Models;
+using NotificationHub.Models;
 
-namespace Quiz.Controllers
+namespace NotificationHub.Controllers
 {
     public class HomeController : Controller
     {
