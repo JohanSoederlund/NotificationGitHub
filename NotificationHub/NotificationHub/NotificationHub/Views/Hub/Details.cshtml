@@ -1,0 +1,36 @@
+﻿@model NotificationHub.Models.Hub
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>Hub</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Organization)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Organization)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Release)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Release)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Commit)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Commit)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.ID">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

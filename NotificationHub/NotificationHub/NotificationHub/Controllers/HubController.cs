@@ -9,30 +9,22 @@ using NotificationHub.Models;
 
 namespace NotificationHub.Controllers
 {
-    public class SettingsController : Controller
+    public class HubController : Controller
     {
         private readonly NotificationHubContext _context;
-
-        public SettingsController(NotificationHubContext context)
+        //webhook get, pass response to View(WebHookObj);
+        public HubController(NotificationHubContext context)
         {
             _context = context;
         }
 
-        // GET: Settings
-        public async Task<IActionResult> Index(string searchString)
+        // GET: Hub
+        public async Task<IActionResult> Index()
         {
-            var settings = from m in _context.Settings
-                         select m;
-
-            if (!String.IsNullOrEmpty(searchString))
-            {
-                settings = settings.Where(s => s.Name.Contains(searchString));
-            }
-
-            return View(await settings.ToListAsync());
+            return View(await _context.Hub.ToListAsync());
         }
 
-        // GET: Settings/Details/5
+        // GET: Hub/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -40,42 +32,39 @@ namespace NotificationHub.Controllers
                 return NotFound();
             }
 
-            var settings = await _context.Settings
+            var hub = await _context.Hub
                 .SingleOrDefaultAsync(m => m.ID == id);
-            if (settings == null)
+            if (hub == null)
             {
                 return NotFound();
             }
-
-            return View(settings);
+            
+            return View(hub);
         }
 
-        // GET: Settings/Create
+        // GET: Hub/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Settings/Create
+        // POST: Hub/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Name,PW,Organization,Repo,Commit")] Settings settings)
+        public async Task<IActionResult> Create([Bind("ID,Organization,Release,Commit")] Hub hub)
         {
-    //        if (settings.Org2)
-     //           settings.Organization = 1;
-
             if (ModelState.IsValid)
             {
-                _context.Add(settings);
+                _context.Add(hub);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(settings);
+            return View(hub);
         }
 
-        // GET: Settings/Edit/5
+        // GET: Hub/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -83,22 +72,22 @@ namespace NotificationHub.Controllers
                 return NotFound();
             }
 
-            var settings = await _context.Settings.SingleOrDefaultAsync(m => m.ID == id);
-            if (settings == null)
+            var hub = await _context.Hub.SingleOrDefaultAsync(m => m.ID == id);
+            if (hub == null)
             {
                 return NotFound();
             }
-            return View(settings);
+            return View(hub);
         }
 
-        // POST: Settings/Edit/5
+        // POST: Hub/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,PW,Organization,Repo,Commit")] Settings settings)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Organization,Release,Commit")] Hub hub)
         {
-            if (id != settings.ID)
+            if (id != hub.ID)
             {
                 return NotFound();
             }
@@ -107,12 +96,12 @@ namespace NotificationHub.Controllers
             {
                 try
                 {
-                    _context.Update(settings);
+                    _context.Update(hub);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!SettingsExists(settings.ID))
+                    if (!HubExists(hub.ID))
                     {
                         return NotFound();
                     }
@@ -123,10 +112,10 @@ namespace NotificationHub.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(settings);
+            return View(hub);
         }
 
-        // GET: Settings/Delete/5
+        // GET: Hub/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -134,30 +123,30 @@ namespace NotificationHub.Controllers
                 return NotFound();
             }
 
-            var settings = await _context.Settings
+            var hub = await _context.Hub
                 .SingleOrDefaultAsync(m => m.ID == id);
-            if (settings == null)
+            if (hub == null)
             {
                 return NotFound();
             }
 
-            return View(settings);
+            return View(hub);
         }
 
-        // POST: Settings/Delete/5
+        // POST: Hub/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var settings = await _context.Settings.SingleOrDefaultAsync(m => m.ID == id);
-            _context.Settings.Remove(settings);
+            var hub = await _context.Hub.SingleOrDefaultAsync(m => m.ID == id);
+            _context.Hub.Remove(hub);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool SettingsExists(int id)
+        private bool HubExists(int id)
         {
-            return _context.Settings.Any(e => e.ID == id);
+            return _context.Hub.Any(e => e.ID == id);
         }
     }
 }

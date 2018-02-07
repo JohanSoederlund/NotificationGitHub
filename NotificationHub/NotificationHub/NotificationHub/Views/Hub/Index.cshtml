@@ -1,7 +1,48 @@
-﻿@{
-    ViewData["Title"] = "Notification Hub";
+﻿@model IEnumerable<NotificationHub.Models.Hub>
+@{
+    ViewData["Title"] = "Index";
 }
 
-<h2>My notifications</h2>
+<h2>Dashboard</h2>
 
-<p>Hello from our View Template!</p>
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Organization)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Release)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Commit)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Organization)
+                </td>
+                <td>
+                    @if (1 == 0)
+                    {
+                        @Html.DisplayFor(modelItem => item.Release)
+                    }
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Commit)
+                </td>
+                <td>
+                    <a asp-action="View" asp-route-id="@item.ID">View all</a> |
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

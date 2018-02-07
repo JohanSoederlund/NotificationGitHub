@@ -21,7 +21,8 @@ namespace NotificationHub.Models
                 }
 
                 context.Settings.AddRange(
-                        new Settings
+                    /*    
+                    new Settings
                         {
                             Title = "When Harry Met Sally",
                             ReleaseDate = DateTime.Parse("1989-1-11"),
@@ -52,6 +53,8 @@ namespace NotificationHub.Models
                         Genre = "Western",
                         Price = 3.99M
                     }
+                    */
+                    
                 );
                 context.SaveChanges();
             }

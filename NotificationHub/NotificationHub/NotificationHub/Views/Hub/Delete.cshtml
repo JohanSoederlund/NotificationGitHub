@@ -1,0 +1,39 @@
+﻿@model NotificationHub.Models.Hub
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<h2>Delete</h2>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>Hub</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Organization)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Organization)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Release)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Release)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Commit)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Commit)
+        </dd>
+    </dl>
+    
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="ID" />
+        <input type="submit" value="Delete" class="btn btn-default" /> |
+        <a asp-action="Index">Back to List</a>
+    </form>
+</div>

@@ -11,9 +11,10 @@ using System;
 namespace NotificationHub.Migrations
 {
     [DbContext(typeof(NotificationHubContext))]
-    partial class NotificationHubContextModelSnapshot : ModelSnapshot
+    [Migration("20180207140346_Initial2")]
+    partial class Initial2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

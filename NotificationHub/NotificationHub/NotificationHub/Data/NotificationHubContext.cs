@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace NotificationHub.Models
 {
@@ -14,5 +10,7 @@ namespace NotificationHub.Models
         }
 
         public DbSet<NotificationHub.Models.Settings> Settings { get; set; }
+
+        public DbSet<NotificationHub.Models.Hub> Hub { get; set; }
     }
 }
