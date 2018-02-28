@@ -10,6 +10,11 @@ namespace NotificationGitHub.Models.ManageViewModels
     {
         public string Username { get; set; }
 
+        /*
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
+        public DateTime ReleaseDate { get; set; }
+        */
+
         public bool IsEmailConfirmed { get; set; }
 
         [Required]

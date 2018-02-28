@@ -25,5 +25,7 @@ namespace NotificationGitHub.Data
         }
 
         public DbSet<NotificationGitHub.Models.DashBoardViewModels.DashBoardViewModel> DashBoardViewModel { get; set; }
+
+        public DbSet<NotificationGitHub.Models.DashBoardViewModels.DashBoardSettingsViewModel> DashBoardSettingsViewModel { get; set; }
     }
 }

@@ -50,6 +50,7 @@ namespace NotificationGitHub.Controllers
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
+            Console.WriteLine("ANVÄNDARNAMN   "+user.Email);
             if (user == null)
             {
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
