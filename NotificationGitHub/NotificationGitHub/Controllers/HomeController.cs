@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebHooks;
+using Newtonsoft.Json.Linq;
 using NotificationGitHub.Models;
 
 namespace NotificationGitHub.Controllers
@@ -27,6 +29,19 @@ namespace NotificationGitHub.Controllers
             ViewData["Message"] = "Your contact page.";
 
             return View();
+        }
+
+        [GitHubWebHook]
+        public IActionResult GitHubHandler(string id, string @event, JObject data)
+        {
+
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            return Ok();
         }
 
         public IActionResult Error()

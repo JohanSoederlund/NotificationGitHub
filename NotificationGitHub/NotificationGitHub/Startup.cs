@@ -8,6 +8,11 @@ using Microsoft.Extensions.DependencyInjection;
 using NotificationGitHub.Data;
 using NotificationGitHub.Models;
 using NotificationGitHub.Services;
+using System.Net.WebSockets;
+using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
+using System.Threading;
+using Microsoft.AspNetCore.Mvc;
 
 namespace NotificationGitHub
 {
@@ -96,14 +101,19 @@ namespace NotificationGitHub
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
 
-            services.AddMvc();
+            services.AddMvc().AddSessionStateTempDataProvider()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1).AddGitHubWebHooks();
 
-            
+            services.AddSession();
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+
+            app.UseSession();
             if (env.IsDevelopment())
             {
                 app.UseBrowserLink();
@@ -114,19 +124,33 @@ namespace NotificationGitHub
             {
                 app.UseExceptionHandler("/Home/Error");
             }
-
+            //app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseAuthentication();
 
-            /*
-            app.UseGitHubAuthentication(options =>
-            {
-                options.ClientId = "49e302895d8b09ea5656";
-                options.ClientSecret = "98f1bf028608901e9df91d64ee61536fe562064b";
-            });
-            */
+            app.UseWebSockets();
 
+            app.Use(async (context, next) =>
+            {
+                if (context.Request.Path == "/MyDashBoard")
+                {
+                    if (context.WebSockets.IsWebSocketRequest)
+                    {
+                        WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
+                        await MyDashBoard(context, webSocket);
+                    }
+                    else
+                    {
+                        context.Response.StatusCode = 400;
+                    }
+                }
+                else
+                {
+                    await next();
+                }
+
+            });
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
@@ -134,5 +158,18 @@ namespace NotificationGitHub
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
         }
-    }
+
+		private async Task MyDashBoard(HttpContext context, WebSocket webSocket)
+		{
+			var buffer = new byte[1024 * 4];
+			WebSocketReceiveResult result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+			while (!result.CloseStatus.HasValue)
+			{
+				await webSocket.SendAsync(new ArraySegment<byte>(buffer, 0, result.Count), result.MessageType, result.EndOfMessage, CancellationToken.None);
+
+				result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+			}
+			await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
+		}
+	}
 }
