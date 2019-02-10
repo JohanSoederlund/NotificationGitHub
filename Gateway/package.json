@@ -1,0 +1,28 @@
+{
+  "name": "gateway",
+  "version": "0.1.0",
+  "private": false,
+  "author": "Johan Söderlund",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "fs": "0.0.1-security",
+    "jsonwebtoken": "^8.4.0",
+    "koa": "^2.6.2",
+    "koa-bodyparser": "^4.2.1",
+    "koa-helmet": "^4.0.0",
+    "koa-jwt": "^3.5.1",
+    "koa-router": "^7.4.0",
+    "koa-websocket": "^5.0.1",
+    "nodemon": "^1.18.9",
+    "request": "^2.88.0",
+    "request-promise-native": "^1.0.5"
+  },
+  "scripts": {
+    "start": "nodemon app/index.js",
+    "build": ""
+  },
+  "devDependencies": {
+    "koa-logger": "^2.0.1"
+  }
+}
