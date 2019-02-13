@@ -32,9 +32,9 @@ router.get("/user", async function (ctx) {
     try {
         //await DatabaseManager.findUser({user: ctx.request})
         await DatabaseManager.findUser({username: "JohanSoederlund"})
-        .then((user, success) => {
-            ctx.body = user.value;
-            if (success) {
+        .then((result) => {
+            ctx.body = result.value;
+            if (result.success) {
                 ctx.response.status = 200;
             } else {
                 ctx.response.status = 400;
@@ -69,15 +69,11 @@ router.post("/user", async function (ctx) {
 
 router.patch("/user", async function (ctx) {
     try {
-        let home = ctx.request.body;
-        //home.user = ctx.state.user.user;
-        //home = new DatabaseModel(ctx.request.body);
-        await DatabaseManager.saveNewHome(ctx.request.body)
+        
+        await DatabaseManager.updateUser(ctx.request.body)
         .then( (result) => {
             ctx.body = result.value;
-            ctx.body.links = {login: "/login", register: "/register", homes: "/homes", home: "/homes/:id"};
             if (result.success) {
-                ctx.body.links[result.value.name] = "/homes/" + result.value._id;
                 ctx.response.status = 201;
             } else {
                 ctx.response.status = 400;

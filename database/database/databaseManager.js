@@ -64,13 +64,20 @@ function saveNewUser(user) {
 
 function updateUser(user) {
     return new Promise((resolve, reject) => {
-        if(JSON.stringify(user.schema) !== JSON.stringify(UserModel.schema)) {
+        try {
+            new UserModel(user);
+        } catch (error) {
             reject({value: "Wrong schema error", success: false});
         }
+        let option = {
+            new: true,
+            useFindAndModify: false
+        }
+
         //{$set:{name:"Naomi"}}
-        UserModel.findOneAndUpdate({username: user.username}, user, {new: true}, (err, updated) => {
+        UserModel.findOneAndUpdate({username: user.username}, user, option, (err, updated) => {
             if (err) reject(err);
-            resolve(updated);
+            resolve({value: updated, success: true});
         });
     });
 }
