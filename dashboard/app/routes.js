@@ -13,6 +13,15 @@ const router = new Router();
 /**
  * Every route below.
  */
+router.get("/", async function (ctx) {
+  ctx.response.status = 200;
+  ctx.body = {
+    home: "DASHBOARD HOME"
+  };
+  
+});
+
+
 router.get("/dashboard", async function (ctx) {
     ctx.response.status = 200;
     ctx.body = {

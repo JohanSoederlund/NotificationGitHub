@@ -2,6 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
+  "homepage": "http://172.17.0.1:80/dashboard",
   "dependencies": {
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
@@ -9,7 +10,7 @@
   },
   "scripts": {
     "start": "PORT=3002 react-scripts start",
-    "build": "react-scripts build",
+    "build": "PORT=3002 react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -21,5 +22,8 @@
     "not dead",
     "not ie <= 11",
     "not op_mini all"
-  ]
+  ],
+  "devDependencies": {
+    "terser": "^3.14.1"
+  }
 }

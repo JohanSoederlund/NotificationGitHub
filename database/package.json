@@ -1,5 +1,5 @@
 {
-  "name": "gateway",
+  "name": "database",
   "version": "0.1.0",
   "private": false,
   "author": "Johan Söderlund",
@@ -12,6 +12,8 @@
     "koa-helmet": "^4.0.0",
     "koa-jwt": "^3.5.1",
     "koa-router": "^7.4.0",
+    "mongodb": "^3.1.12",
+    "mongoose": "^5.4.6",
     "nodemon": "^1.18.9"
   },
   "scripts": {
