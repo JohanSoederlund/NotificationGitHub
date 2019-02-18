@@ -2,7 +2,7 @@
 
 const Router = require("koa-router");
 const jwt = require('jsonwebtoken');
-
+const axios = require('axios');
 
 /*
 var GitHubStrategy = require('passport-github').Strategy;

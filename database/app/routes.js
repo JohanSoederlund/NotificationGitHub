@@ -14,24 +14,10 @@ const SECRET = "shared-secret";
 
 const router = new Router();
 
-/**
- * Every route below.
- */
-router.get("/", async function (ctx) {
-    ctx.response.status = 200;
-    ctx.body = {
-      home: "HOME"
-    };
-    
-});
-
 router.get("/user", async function (ctx) {
     
-
-
     try {
-        //await DatabaseManager.findUser({user: ctx.request})
-        await DatabaseManager.findUser({username: "JohanSoederlund"})
+        await DatabaseManager.findUser({user: ctx.request.username})
         .then((result) => {
             ctx.body = result.value;
             if (result.success) {
@@ -84,7 +70,6 @@ router.patch("/user", async function (ctx) {
         ctx.body = error;
     }
 });
-
 
 /**
  * For development reasons, remove in production

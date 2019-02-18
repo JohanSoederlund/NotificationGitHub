@@ -1,5 +1,6 @@
 "use strict";
 
+const axios = require('axios');
 const Koa = require("koa");
 const BodyParser = require("koa-bodyparser");
 const logger = require('koa-logger');
@@ -7,6 +8,8 @@ const helmet = require("koa-helmet");
 const fs = require("fs");
 const http2 = require("http2");
 const kJwt = require('koa-jwt');
+const jwt = require('jsonwebtoken');
+const decode = require('koa-jwt-decode');
 
 const session = require('koa-session');
 const passport = require('koa-passport');
@@ -18,13 +21,16 @@ const router = new Router();
 const app = new Koa();
 
 /**
- * Change to node var in production
+ * const SECRET = process.env.SECRET;
  */
 const SECRET = "shared-secret";
 
 app.use(BodyParser());
 app.use(logger());
 app.use(helmet());
+
+//npm i cors?
+//app.use(cors({credentials:true}))
 
 // required for cookie signature generation
 app.keys = ['newest secret key', 'older secret key'];
@@ -36,8 +42,12 @@ app.use(passport.session());
 
 var GitHubStrategy = require('passport-github').Strategy;
 
-const GITHUB_CLIENT_ID = "";
-const GITHUB_CLIENT_SECRET = "";
+/**
+ * const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
+ * const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
+ */
+const GITHUB_CLIENT_ID = "179451e5ba9314472772";
+const GITHUB_CLIENT_SECRET = "d9710287b4d37b5f9be6f13308a4a81ee8f4f7cb";
 
 
 var user;
@@ -95,7 +105,12 @@ app.use(async (ctx, next) => {
     await next();
 })
 
+//, decode({ secret: SECRET })
 router.get("/", async function (ctx) {
+  //console.log(this.session);
+  console.log("\n\n\nreq");
+  console.log(ctx.request);
+  console.log("\n\n\n");
   ctx.response.status = 200;
   ctx.body = {
     home: "DASHBOARD HOME",
@@ -107,8 +122,26 @@ router.get("/", async function (ctx) {
 router.get("/login", passport.authenticate('github'));
 
 router.get("/auth", passport.authenticate('github'), async function (ctx) {
-    //console.log("ctx auth: "+JSON.stringify(ctx));
-    ctx.redirect('/');
+    var tok = jwt.sign({ user: user }, SECRET, {expiresIn: '62d'});
+    /*
+    const options = {
+      headers: { Authorization: `Bearer ${tok}` }
+      //headers: { Authorization: `Bearer ${ctx.session.passport.user.access_token}` }
+    }
+    ctx.headers = { Authorization: `Bearer ${ctx.session.passport.user.access_token}` }
+*/
+
+
+    const options = {
+      headers: { Authorization: `Bearer ${tok}` },
+      json: true,
+      method: 'GET',
+      uri: "http://172.17.0.1/dashboard"
+    }
+    const response = await rp(options)
+    ctx.body = JSON.stringify(response)
+    ctx.redirect("http://172.17.0.1/dashboard", options);
+
 });
 
 //app.use(router.router.routes()).use(router.router.allowedMethods(options));
@@ -119,3 +152,18 @@ app.listen(process.env.PORT || 3004);
 const server = http2.createSecureServer(options, app.callback());
 
 //server.listen(process.env.PORT || 443);
+
+
+function postDatabase(user) {
+  axios.post("http://localhost:3010", {
+      user
+  })
+  .then((res) => {
+      console.log(`statusCode: ${res.statusCode}`)
+      console.log(res)
+  })
+  .catch((error) => {
+      console.error(error)
+  })
+}
+

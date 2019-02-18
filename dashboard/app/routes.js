@@ -16,7 +16,7 @@ const router = new Router();
 router.get("/", async function (ctx) {
   ctx.response.status = 200;
   ctx.body = {
-    home: "DASHBOARD HOME"
+    home: "DASHBOARD"
   };
   
 });
