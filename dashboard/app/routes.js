@@ -3,10 +3,7 @@
 const Router = require("koa-router");
 const jwt = require('jsonwebtoken');
 
-/**
- * Change to node var in production
- */
-const SECRET = "shared-secret";
+const SECRET = process.env.SECRET;
 
 const router = new Router();
 
@@ -16,14 +13,16 @@ const router = new Router();
 router.get("/", async function (ctx) {
   ctx.response.status = 200;
   ctx.body = {
-    home: "DASHBOARD"
+    cookies: ctx.cookies.get("jwt")
   };
-  
 });
 
 
 router.get("/dashboard", async function (ctx) {
     ctx.response.status = 200;
+    
+    console.log(ctx.headers.cookie);
+
     ctx.body = {
       home: "DASHBOARD HOME"
     };

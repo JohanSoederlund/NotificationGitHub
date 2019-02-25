@@ -5,7 +5,6 @@ const BodyParser = require("koa-bodyparser");
 const logger = require('koa-logger');
 const helmet = require("koa-helmet");
 const fs = require("fs");
-const http2 = require("http2");
 const kJwt = require('koa-jwt');
 
 const DatabaseManager = require("../database/databaseManager");
@@ -13,20 +12,11 @@ const router = require("../app/routes");
 
 const app = new Koa();
 
-/**
- * Change to node var in production
- */
-const SECRET = "shared-secret";
-
+const SECRET = process.env.SECRET;
 
 app.use(BodyParser());
 app.use(logger());
 app.use(helmet());
-
-const options = {
-    key: fs.readFileSync('/home/johan/studier/1DV527/ssl/selfsigned.key'),
-    cert: fs.readFileSync('/home/johan/studier/1DV527/ssl/selfsigned.crt'),
-};
 
 DatabaseManager.connectDatabase();
 
@@ -51,10 +41,6 @@ app.use(async (ctx, next) => {
     await next();
 })
 
-app.use(router.router.routes()).use(router.router.allowedMethods(options));
+app.use(router.router.routes()).use(router.router.allowedMethods());
 
 app.listen(process.env.PORT || 3010);
-
-const server = http2.createSecureServer(options, app.callback());
-
-//server.listen(process.env.PORT || 443);

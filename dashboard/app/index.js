@@ -4,27 +4,17 @@ const Koa = require("koa");
 const BodyParser = require("koa-bodyparser");
 const logger = require('koa-logger');
 const helmet = require("koa-helmet");
-const fs = require("fs");
-const http2 = require("http2");
 const kJwt = require('koa-jwt');
 
 const router = require("../app/routes");
 
 const app = new Koa();
 
-/**
- * Change to node var in production
- */
-const SECRET = "shared-secret";
+const SECRET = process.env.SECRET;
 
 app.use(BodyParser());
 app.use(logger());
 app.use(helmet());
-
-const options = {
-    key: fs.readFileSync('/home/johan/studier/1DV612/ssl/selfsigned.key'),
-    cert: fs.readFileSync('/home/johan/studier/1DV612/ssl/selfsigned.crt'),
-};
 
 // Custom 401 handling if you don't want to expose koa-jwt errors to users
 app.use(function(ctx, next){
@@ -49,8 +39,4 @@ app.use(async (ctx, next) => {
 
 app.use(router.router.routes()).use(router.router.allowedMethods(options));
 
-app.listen(process.env.PORT || 3001);
-
-const server = http2.createSecureServer(options, app.callback());
-
-//server.listen(process.env.PORT || 443);
+app.listen(process.env.PORT || 3002);

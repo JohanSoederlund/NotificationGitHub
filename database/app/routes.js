@@ -7,26 +7,26 @@ const jwt = require('jsonwebtoken');
 const DatabaseManager = require("../database/databaseManager");
 const UserModel = require("../database/userModel");
 
-/**
- * Change to node var in production
- */
-const SECRET = "shared-secret";
+const SECRET = process.env.SECRET;
 
 const router = new Router();
 
 router.get("/user", async function (ctx) {
-    
+    console.log(".get /user");
+    console.log(ctx.request.body);
     try {
-        await DatabaseManager.findUser({user: ctx.request.username})
+        await DatabaseManager.findUser({user: ctx.request.body.user.username})
         .then((result) => {
             ctx.body = result.value;
             if (result.success) {
                 ctx.response.status = 200;
             } else {
+                console.log(JSON.stringify(result));
                 ctx.response.status = 400;
             }
         })
     } catch (error) {
+        console.log(error);
         ctx.response.status = 400;
         ctx.body = error;
     }
