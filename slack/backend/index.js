@@ -6,7 +6,7 @@ const logger = require('koa-logger');
 const helmet = require("koa-helmet");
 const kJwt = require('koa-jwt');
 
-const router = require("../app/routes");
+const router = require("./routes");
 
 const app = new Koa();
 
@@ -37,6 +37,6 @@ app.use(async (ctx, next) => {
     await next();
 })
 
-app.use(router.router.routes()).use(router.router.allowedMethods(options));
+app.use(router.router.routes()).use(router.router.allowedMethods());
 
-app.listen(process.env.PORT || 3002);
+app.listen(process.env.PORT || 3009);
