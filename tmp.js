@@ -60,7 +60,7 @@ passport.use(new GitHubStrategy({
   scope: 'repo'
 },
 function(githubAccessToken, refreshToken, profile, cb) {
-  user = {githubId: profile.id, username: profile.username, githubAccessToken: githubAccessToken, slackId: "", slackAccessToken: ""};
+  user = {githubId: profile.id, username: profile.username, githubAccessToken: githubAccessToken, slackProfile: {}, slackAccessToken: ""};
   return cb(null, user);
   getDatabase(user, "user").then( (result) => {
     console.log("result: ");
@@ -76,7 +76,7 @@ passport.use(new SlackStrategy({
   scope: ['chat:write:user']
 }, (slackAccessToken, refreshToken, profile, done) => {
   console.log("accessToken: " + slackAccessToken + " \nrefreshToken: "+ refreshToken + " \nProfile: " + profile);
-  user.slackId = profile.user.id;
+  user.slackProfile = profile;
   user.slackAccessToken = slackAccessToken;
   
   done(null, profile);
@@ -115,17 +115,18 @@ app.use(async (ctx, next) => {
 router.get("/login", passport.authenticate('github'));
 
 router.get("/auth", passport.authenticate('github'), async function (ctx) {
-  
+    var token = jwt.sign({ user: user }, SECRET, {expiresIn: '62d'});
+    ctx.cookies.set("jwt", token, {httpOnly: false, domain: "172.17.0.1"});
     ctx.redirect('https://172.17.0.1/auth/slack');
 });
 
+// path to start the OAuth flow
 router.get('/auth/slack', passport.authorize('slack'));
 
+// OAuth callback url
 router.get('/auth/slack/callback', 
   passport.authorize('slack', { failureRedirect: '/auth/slack' }), async function (ctx) {
-    var token = jwt.sign({ user: user }, SECRET, {expiresIn: "1d"});
-    ctx.cookies.set("jwt", token, {httpOnly: false, domain: "172.17.0.1"});
-    ctx.redirect('https://172.17.0.1/dashboard');
+    ctx.body = {user}
   });
 
 app.use(router.routes()).use(router.allowedMethods());

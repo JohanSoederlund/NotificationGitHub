@@ -12,8 +12,12 @@ const router = new Router();
  */
 router.get("/", async function (ctx) {
   ctx.response.status = 200;
+  var token = ctx.cookies.get("jwt");
+  var decoded = jwt.verify(token, SECRET);
+  console.log(decoded);
   ctx.body = {
-    cookies: ctx.cookies.get("jwt")
+    cookies: ctx.cookies.get("jwt"),
+    decoded: decoded
   };
 });
 

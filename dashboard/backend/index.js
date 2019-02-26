@@ -6,7 +6,7 @@ const logger = require('koa-logger');
 const helmet = require("koa-helmet");
 const kJwt = require('koa-jwt');
 
-const router = require("../app/routes");
+const router = require("./routes");
 
 const app = new Koa();
 
@@ -29,7 +29,7 @@ app.use(function(ctx, next){
 });
 
 //In production remove /^\//,
-app.use(kJwt({ secret: SECRET }).unless({ path: [/^\//, /^\/dashboard/]}));
+//app.use(kJwt({ secret: SECRET }).unless({ path: [/^\//, /^\/dashboard/]}));
 
 app.use(async (ctx, next) => {
     ctx.set('Access-Control-Allow-Methods', 'GET, POST');

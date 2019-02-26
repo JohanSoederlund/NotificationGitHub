@@ -1,42 +1,71 @@
-"use strict";
+const { RTMClient } = require('@slack/client');
+const axios = require('axios');
 
-const Koa = require("koa");
-const BodyParser = require("koa-bodyparser");
-const logger = require('koa-logger');
-const helmet = require("koa-helmet");
-const kJwt = require('koa-jwt');
+// An access token (from your Slack app or custom integration - usually xoxb)
+const token = process.env.SLACK_TOKEN;
 
-const router = require("./routes");
+const {CLIENT_ID, CLIENT_SECRET, PORT} = process.env,
+      SlackStrategy = require('passport-slack').Strategy,
+      passport = require('passport'),
+      express = require('express'),
+      app = express();
 
-const app = new Koa();
+var user = {profile: {}, accessToken: ""};
 
-const SECRET = process.env.SECRET;
+passport.use(new SlackStrategy({
+    clientID: CLIENT_ID,
+    clientSecret: CLIENT_SECRET,
+    scope: ['chat:write:user']
+  }, (accessToken, refreshToken, profile, done) => {
+    // optionally persist profile data
+    console.log("accessToken: " + accessToken + " \nrefreshToken: "+ refreshToken + " \nProfile: " + profile);
+    user.profile = profile;
+    user.accessToken = accessToken;
+    
+    done(null, profile);
+  }
+));
 
-app.use(BodyParser());
-app.use(logger());
-app.use(helmet());
+app.use(passport.initialize());
+app.use(require('body-parser').urlencoded({ extended: true }));
 
-// Custom 401 handling if you don't want to expose koa-jwt errors to users
-app.use(function(ctx, next){
-    return next().catch((err) => {
-      if (401 == err.status) {
-        ctx.status = 401;
-        ctx.body = 'Protected resource, use Authorization header to get access\n';
-      } else {
-        throw err;
-      }
+app.get('/', 
+  passport.authorize('slack', { failureRedirect: '/auth/slack' }),
+  (req, res) => {
+        //curl -X POST -H 'Content-type: application/json' --data '{"text":"Allow me to reintroduce myself!"}' YOUR_WEBHOOK_URL
+        postSlack('https://slack.com/api/chat.postMessage').then ( (res) => {
+
+        });
+        var pr = JSON.stringify(user);
+        res.send(pr);
+
+  }
+);
+
+// path to start the OAuth flow
+app.get('/auth/slack', passport.authorize('slack'));
+
+// OAuth callback url
+app.get('/auth/slack/callback', 
+  passport.authorize('slack', { failureRedirect: '/auth/slack' }),
+  (req, res) => res.redirect('/')
+);
+
+app.listen(PORT);
+
+function postSlack(url) {
+    return new Promise((resolve, reject) => {
+        url = "http://slack.com/api/chat.postMessage?token="+user.accessToken+"&channel="+"U1H386HLL"+"&text="+"hej fran QS";
+        
+        axios({
+            method: 'post',
+            url: url
+        })
+        .then((res) => {
+            resolve(res);
+        })
+        .catch((error) => {
+            reject(error);
+        })
     });
-});
-
-//In production remove /^\//,
-app.use(kJwt({ secret: SECRET }).unless({ path: [/^\//, /^\/dashboard/]}));
-
-app.use(async (ctx, next) => {
-    ctx.set('Access-Control-Allow-Methods', 'GET, POST');
-    ctx.set({accept: 'application/json'});
-    await next();
-})
-
-app.use(router.router.routes()).use(router.router.allowedMethods());
-
-app.listen(process.env.PORT || 3009);
+  }
