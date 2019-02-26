@@ -44,7 +44,7 @@ function saveNewUser(user) {
         if(JSON.stringify(user.schema) !== JSON.stringify(UserModel.schema)) {
             reject({value: "Wrong schema error", success: false});
         } 
-        findUser({githubId: user.githubId, user: user.username}).then( (existingUser) => {
+        findUser({username: user.username}).then( (existingUser) => {
             console.log("EXISTINGUSER");
             console.log(existingUser);
             if (existingUser.value === null) {
@@ -53,7 +53,9 @@ function saveNewUser(user) {
                     resolve({value: saved, success: true});
                 })
             } else {
-                reject({value: "User allready exist", success: false});
+                updateUser(user).then ( (res)=> {
+                    resolve({value: res.value, success: true});
+                });
             }
         })
         .catch((error) => {
@@ -64,18 +66,22 @@ function saveNewUser(user) {
 
 function updateUser(user) {
     return new Promise((resolve, reject) => {
+        /*
         try {
             new UserModel(user);
         } catch (error) {
             reject({value: "Wrong schema error", success: false});
         }
+        */
         let option = {
             new: true,
             useFindAndModify: false
         }
-
-        //{$set:{name:"Naomi"}}
-        UserModel.findOneAndUpdate({username: user.username}, user, option, (err, updated) => {
+        let usr = {githubId: user.githubId, username: user.username, githubAccessToken: user.githubAccessToken, slackId: "", slackAccessToken: ""};
+        if ('slackId' in user) usr.slackId = user.slackId;
+        if ('slackAccessToken' in user) usr.slackAccessToken = user.slackAccessToken;
+        
+        UserModel.findOneAndUpdate({username: user.username}, usr, option, (err, updated) => {
             if (err) reject(err);
             resolve({value: updated, success: true});
         });
@@ -86,6 +92,8 @@ function findUser(user) {
     return new Promise((resolve, reject) => {
         UserModel.findOne(user)
         .then((user) => {
+            console.log("user");
+            console.log(user);
             resolve({value: user, success: true});
         })
         .catch((error) => {

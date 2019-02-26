@@ -5,7 +5,9 @@ const mongoose = require('mongoose');
 let userSchema = new mongoose.Schema({
     githubId: { type: String, required: true },
     username: { type: String, required: true },
-    accessToken: { type: String, required: true }
+    githubAccessToken: { type: String, required: true },
+    slackId: { type: String},
+    slackAccessToken: { type: String}
   });
 
 let User = mongoose.model('User', userSchema);

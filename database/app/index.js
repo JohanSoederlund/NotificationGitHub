@@ -33,7 +33,7 @@ app.use(function(ctx, next){
 });
 
 //In production remove /^\//,
-app.use(kJwt({ secret: SECRET }).unless({ path: [/^\//, /^\/user/] }));
+//app.use(kJwt({ secret: SECRET }).unless({ path: [/^\//, /^\/user/] }));
 
 app.use(async (ctx, next) => {
     ctx.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, HEAD');

@@ -13,9 +13,9 @@ const router = new Router();
 
 router.get("/user", async function (ctx) {
     console.log(".get /user");
-    console.log(ctx.request.body);
+    console.log(ctx.request.body.user.username);
     try {
-        await DatabaseManager.findUser({user: ctx.request.body.user.username})
+        await DatabaseManager.findUser({username: ctx.request.body.user.username})
         .then((result) => {
             ctx.body = result.value;
             if (result.success) {
@@ -36,39 +36,35 @@ router.get("/user", async function (ctx) {
 router.post("/user", async function (ctx) {
     
     try {
-        let user = new UserModel(ctx.request.body);
+        console.log("POST /user");
+        console.log(ctx.request.body.user);
+        let usr = ctx.request.body.user;
+        if (usr["_id"] !== undefined) {
+            delete usr["_id"]; 
+        }
+        
+        console.log(usr);
+        ctx.body = usr;
+        
+        let user = new UserModel(usr);
         await DatabaseManager.saveNewUser(user)
         .then( (result) => {
+            console.log("\nLAST");
+            console.log(result);
             ctx.body = result.value;
             if (result.success) {
                 ctx.response.status = 201;
             } else {
-                ctx.response.status = 400;
+                ctx.response.status = 200;
             }
         });
+        
     } catch (error) {
+        console.log("FUCKING HELL OF DB");
         ctx.response.status = 400;
         ctx.body = error;
     }
     
-});
-
-router.patch("/user", async function (ctx) {
-    try {
-        
-        await DatabaseManager.updateUser(ctx.request.body)
-        .then( (result) => {
-            ctx.body = result.value;
-            if (result.success) {
-                ctx.response.status = 201;
-            } else {
-                ctx.response.status = 400;
-            }
-        });
-    } catch (error) {
-        ctx.response.status = 400;
-        ctx.body = error;
-    }
 });
 
 /**

@@ -5,9 +5,7 @@ const Koa = require("koa");
 const BodyParser = require("koa-bodyparser");
 const logger = require('koa-logger');
 const helmet = require("koa-helmet");
-const kJwt = require('koa-jwt');
 const jwt = require('jsonwebtoken');
-const decode = require('koa-jwt-decode');
 
 const session = require('koa-session');
 const passport = require('koa-passport');
@@ -62,11 +60,6 @@ passport.use(new GitHubStrategy({
 function(githubAccessToken, refreshToken, profile, cb) {
   user = {githubId: profile.id, username: profile.username, githubAccessToken: githubAccessToken, slackId: "", slackAccessToken: ""};
   return cb(null, user);
-  getDatabase(user, "user").then( (result) => {
-    console.log("result: ");
-    console.log(result.config.data.user);
-    return cb(null, result.config.data.user);
-  });
 }
 ));
 
@@ -75,11 +68,13 @@ passport.use(new SlackStrategy({
   clientSecret: SLACK_CLIENT_SECRET,
   scope: ['chat:write:user']
 }, (slackAccessToken, refreshToken, profile, done) => {
-  console.log("accessToken: " + slackAccessToken + " \nrefreshToken: "+ refreshToken + " \nProfile: " + profile);
   user.slackId = profile.user.id;
   user.slackAccessToken = slackAccessToken;
-  
-  done(null, profile);
+  postDatabase(user, "user", "post").then( (result) => {
+    done(null, result.data);
+  }).catch ( (err)=> {
+    done(new Error("Could not save to db, slack"), profile);
+  } )
 }
 ));
 
@@ -103,8 +98,6 @@ app.use(function(ctx, next){
     });
 });
 
-//In production remove /^\//,
-//app.use(kJwt({ secret: SECRET }).unless({ path: [/^\//, /^\/auth/, /^\/login/]}));
 
 app.use(async (ctx, next) => {
     ctx.set('Access-Control-Allow-Methods', 'GET, POST');
@@ -137,10 +130,10 @@ app.listen(process.env.PORT || 3004);
  * @param {signed in user} user 
  * @param {database server sub-url} url 
  */
-function postDatabase(user, url) {
+function postDatabase(user, url, method) {
   return new Promise((resolve, reject) => {
     axios({
-      method: 'get',
+      method: method,
       url: "http://localhost:3010/"+url,
       data: {
         user: user
@@ -148,36 +141,11 @@ function postDatabase(user, url) {
     })
     .then((res) => {
       resolve(res);
-      console.log(`statusCode: ${res.statusCode}`)
-      console.log(res)
     })
     .catch((error) => {
       reject(error);
-        console.error(error)
     })
     
-  });
-}
-
-function getDatabase(user, url) {
-  console.log(user);
-  return new Promise((resolve, reject) => {
-    axios({
-      method: 'get',
-      url: "http://localhost:3010/"+url,
-      data: {
-        user: user
-      }
-    })
-    .then((res) => {
-      resolve(res);
-      console.log(`statusCode: ${res.statusCode}`)
-      console.log(res)
-    })
-    .catch((error) => {
-      reject(error);
-        console.error(error)
-    });
   });
 }
 
