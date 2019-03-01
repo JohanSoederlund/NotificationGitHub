@@ -21,12 +21,13 @@ const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
 const SLACK_CLIENT_ID = process.env.SLACK_CLIENT_ID;
 const SLACK_CLIENT_SECRET = process.env.SLACK_CLIENT_SECRET
 const PORT = process.env.PORT;
+const URL = process.env.URL;
 
 const app = new Koa();
 
 const cors = require('@koa/cors');
 const koaOptions = {
-  origin: 'https://172.17.0.1',
+  origin: 'https://'+URL+'/',
   credentials: true
 };
 app.use(cors(koaOptions));
@@ -44,7 +45,7 @@ app.use(passport.session({
   secret: SECRET,
   cookie: {
       path: '/',
-      domain: 'https://172.17.0.1',
+      domain: 'https://'+URL,
       maxAge: 1000 * 60 * 24 // 24 hours
   }
 }));
@@ -54,7 +55,7 @@ var user;
 passport.use(new GitHubStrategy({
   clientID: GITHUB_CLIENT_ID,
   clientSecret: GITHUB_CLIENT_SECRET,
-  callbackURL: "https://172.17.0.1/auth",
+  callbackURL: "https://"+URL+"/auth",
   scope: 'repo'
 },
 function(githubAccessToken, refreshToken, profile, cb) {
@@ -109,7 +110,7 @@ router.get("/login", passport.authenticate('github'));
 
 router.get("/auth", passport.authenticate('github'), async function (ctx) {
   
-    ctx.redirect('https://172.17.0.1/auth/slack');
+    ctx.redirect('https://'+URL+'/auth/slack');
 });
 
 router.get('/auth/slack', passport.authorize('slack'));
@@ -117,8 +118,8 @@ router.get('/auth/slack', passport.authorize('slack'));
 router.get('/auth/slack/callback', 
   passport.authorize('slack', { failureRedirect: '/auth/slack' }), async function (ctx) {
     var token = jwt.sign({ user: user }, SECRET, {expiresIn: "1d"});
-    ctx.cookies.set("jwt", token, {httpOnly: false, domain: "172.17.0.1"});
-    ctx.redirect('https://172.17.0.1/dashboard');
+    ctx.cookies.set("jwt", token, {httpOnly: false, domain: URL});
+    ctx.redirect('https://'+URL+'/dashboard');
   });
 
 app.use(router.routes()).use(router.allowedMethods());
