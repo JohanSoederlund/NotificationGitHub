@@ -5,6 +5,7 @@
   "homepage": "http://172.17.0.1:80/dashboard",
   "dependencies": {
     "@material-ui/core": "^3.9.2",
+    "js-cookie": "^2.2.0",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "react-scripts": "2.1.3",

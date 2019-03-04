@@ -8,6 +8,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import './App.css';
+import Cookies from 'js-cookie';
 import socket from './Websocket.js';
 
 const styles = theme => ({
@@ -44,21 +45,27 @@ class App extends Component {
 
   constructor(props) {
     super(props);
-    //socket.emit("issues", "JohanSoederlund");
+    
+    console.log("CONSTRUCTOR");
+    console.log(Cookies.get('jwt'));
+    socket.emit("getUser", Cookies.get('jwt'));
+    this.state = {
+        jwt: Cookies.get('jwt')
+    }
   }
 
   componentDidMount() {
-    /*
-    socket.on('notification', function(data){
-      console.log("notification");
+    
+    socket.on('user', function(data){
+      console.log("user");
       console.log(data);
     });
 
-    socket.on('issues', function(data){
-      console.log("issues");
-      console.log(data);
-    });
-    */
+    socket.on('notification', function(data){
+        console.log("notification");
+        console.log(data);
+      });
+
 
     var style = {backgroundColor: "white"};
     if (data.action === "opened") {
