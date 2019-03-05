@@ -6,6 +6,7 @@
   "license": "MIT",
   "dependencies": {
     "fs": "0.0.1-security",
+    "i": "^0.3.6",
     "jsonwebtoken": "^8.4.0",
     "koa": "^2.6.2",
     "koa-bodyparser": "^4.2.1",
@@ -15,6 +16,7 @@
     "koa-socket.io": "^1.1.2",
     "koa-websocket": "^5.0.1",
     "nodemon": "^1.18.9",
+    "npm": "^6.8.0",
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
     "socket.io": "^2.2.0"

@@ -9,7 +9,8 @@ const jwt = require('jsonwebtoken');
 
 const session = require('koa-session');
 const passport = require('koa-passport');
-var GitHubStrategy = require('passport-github').Strategy;
+//var GitHubStrategy = require('passport-github').Strategy;
+var GitHubStrategy = require('passport-github2').Strategy;
 var SlackStrategy = require('passport-slack').Strategy;
 
 const Router = require("koa-router");
@@ -51,12 +52,12 @@ app.use(passport.session({
 }));
 
 var user;
-//todo: add more scopes
+//todo: add more scopes "admin:org"
 passport.use(new GitHubStrategy({
   clientID: GITHUB_CLIENT_ID,
   clientSecret: GITHUB_CLIENT_SECRET,
   callbackURL: "https://"+URL+"/auth",
-  scope: 'repo'
+  scope: ["admin:org_hook", "repo"]
 },
 function(githubAccessToken, refreshToken, profile, cb) {
   user = {githubId: profile.id, username: profile.username, githubAccessToken: githubAccessToken, slackId: "", slackAccessToken: ""};

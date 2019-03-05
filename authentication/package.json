@@ -9,6 +9,7 @@
     "axios": "^0.18.0",
     "cross-cookies": "^1.0.0",
     "fs": "0.0.1-security",
+    "i": "^0.3.6",
     "jsonwebtoken": "^8.4.0",
     "koa": "^2.6.2",
     "koa-bodyparser": "^4.2.1",
@@ -18,7 +19,9 @@
     "koa-session": "^5.10.1",
     "koa-websocket": "^5.0.1",
     "nodemon": "^1.18.9",
+    "npm": "^6.8.0",
     "passport-github": "^1.1.0",
+    "passport-github2": "^0.1.11",
     "passport-slack": "0.0.7"
   },
   "scripts": {
