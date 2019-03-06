@@ -53,7 +53,7 @@ function saveNewUser(user) {
                     resolve({value: saved, success: true});
                 })
             } else {
-                updateUser(user).then ( (res)=> {
+                updateUser(user, existingUser).then ( (res)=> {
                     resolve({value: res.value, success: true});
                 });
             }
@@ -64,7 +64,7 @@ function saveNewUser(user) {
     });
 }
 
-function updateUser(user) {
+function updateUser(user, existingUser) {
     return new Promise((resolve, reject) => {
         /*
         try {
@@ -77,9 +77,17 @@ function updateUser(user) {
             new: true,
             useFindAndModify: false
         }
-        let usr = {githubId: user.githubId, username: user.username, githubAccessToken: user.githubAccessToken, slackId: "", slackAccessToken: ""};
+        let usr = {githubId: user.githubId, username: user.username, githubAccessToken: user.githubAccessToken, slackId: "", slackAccessToken: "", notifications: []};
         if ('slackId' in user) usr.slackId = user.slackId;
         if ('slackAccessToken' in user) usr.slackAccessToken = user.slackAccessToken;
+        if ('organizations' in user) usr.organizations = user.organizations;
+        
+        if ('notifications' in existingUser) usr.notifications = existingUser.notifications;
+        if ('notifications' in user) {
+            user.notifications.forEach(element => {
+                usr.notifications.push(element);
+            });
+        }
         
         UserModel.findOneAndUpdate({username: user.username}, usr, option, (err, updated) => {
             if (err) reject(err);

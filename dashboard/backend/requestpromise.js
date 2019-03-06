@@ -1,16 +1,18 @@
 "use strict";
-var rp = require('request-promise');
+const rp = require('request-promise');
+const axios = require('axios');
 
 const SECRET = process.env.SECRET;
 const URL = process.env.URL;
 
-function createHook(user, url) {
+
+function createHook(method, user, url) {
 
     //'https://api.github.com/repos/1dv023/js223zs-examination-3/hooks'
     //'https://api.github.com/orgs/1dv612/hooks'
     //'https://api.github.com/orgs/GitHubNotificationHub/hooks'
     var options = {
-        method: "POST",
+        method: method,
         uri: url,
         secure: true,
         json: true,
@@ -79,24 +81,28 @@ function getOrganizations(user) {
     return new Promise((resolve, reject) => {
         rp(options)
         .then(function (response) {
-            
-            console.log(response);
-            
             var databaseUser = user;
             databaseUser["organizations"] = [];
             response.forEach(element => {
                 databaseUser["organizations"].push(element.login);
-                createHook(user, element.hooks_url).then( (res) => {
-                    console.log("CREATE HOOK RESPONSE");
-                    console.log(res);
+                createHook("GET", user, element.hooks_url).then( (res) => {
+                    console.log("Hook for " + element.hooks_url + " already exist.");
                 }).catch( (err) => {
-                    console.log("ERROR HOOK");
+                    createHook("POST", user, element.hooks_url).then( (res) => {
+                        console.log("CREATE HOOK RESPONSE");
+                        console.log(res);
+                    }).catch( (err) => {
+                        console.log("ERROR POST HOOK");
+                        console.log(element.hooks_url);
+                    })
                 })
             });
+            
             postDatabase(databaseUser, "user", "post").then( () => {
-
+                console.log("POST to database success in RP");
             }).catch( (err) => {
-
+                console.log("POST to database ERROR in RP");
+                console.log(err);
             });
             
         })
@@ -117,17 +123,16 @@ function postDatabase(user, url, method) {
         }
         })
         .then((res) => {
-        resolve(res);
+            resolve(res);
         })
         .catch((error) => {
-        reject(error);
+            reject(error);
         })
         
     });
 }
 
 module.exports = {
-    createHook,
     getOrganizations,
     postDatabase
 }

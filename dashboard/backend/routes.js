@@ -45,13 +45,17 @@ websocket.io.on('connection', (client) => {
 router.post("/webhook", async function (ctx) {
   ctx.response.status = 200;
   let data = ctx.request.body;
+  console.log(clients);
   console.log(data.organization.login);
-  //check with database which users have data.organization.login
   for ( var property in clients ) {
-    postDatabase({username: property}, "user", "get").then( (user) => {
-      if (user.organizations.includes(data.organization.login)) {
+    console.log(property);
+    requestPromise.postDatabase({username: property}, "user", "get").then( (user) => {
+      console.log("USER");
+      console.log(JSON.parse(user.config.data).user.username);
+      console.log(user.data.organizations);
+      if (user.data.organizations.includes(data.organization.login)) {
         if ("issue" in ctx.request.body) {
-          websocket.io.sockets.clients().sockets[clients["JohanSoederlund"]].emit("issue", {
+          websocket.io.sockets.clients().sockets[clients[user.data.username]].emit("issue", {
             action: data.action.toUpperCase(),
             event: 'ISSUE',
             title: data.issue.title,
@@ -66,7 +70,7 @@ router.post("/webhook", async function (ctx) {
             created_at: new Date(data.issue.created_at).toUTCString()
           });
         } else if ("commits" in ctx.request.body) {
-          websocket.io.sockets.clients().sockets[clients["JohanSoederlund"]].emit("commit", {
+          websocket.io.sockets.clients().sockets[clients[user.data.username]].emit("commit", {
             action: "NEW ",
             event: 'COMMIT',
             title: data.repository.full_name,
@@ -82,11 +86,11 @@ router.post("/webhook", async function (ctx) {
           });
         }
       }
+      
     }).catch( (err) => {
   
     });
   }
-  
   ctx.body = {};
 });
 
