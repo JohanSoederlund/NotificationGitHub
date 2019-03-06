@@ -17,11 +17,12 @@ websocket.io.on('connection', (client) => {
   client.on('getUser', token => { 
     var decoded = jwt.verify(token, SECRET);
     console.log("issues on");
-    client.emit("user", decoded);
-    clients[decoded.user.username] = client.id;
+    //client.emit("user", decoded);
+    clients[decoded.username] = client.id;
     
-    requestPromise.getOrganizations(decoded.user).then( (res) => {
+    requestPromise.getOrganizations(decoded.username).then( (res) => {
       //console.log(res);
+      client.emit("user", res);
     }).catch((err) => {
       //console.log(err);
       
@@ -68,21 +69,9 @@ router.post("/webhook", async function (ctx) {
 
 function sendToDashboard(username, data) {
   console.log("ISSUE");
+  console.log(username);
   if ("issue" in data) {
-    websocket.io.sockets.clients().sockets[clients[username]].emit("issue", {
-      action: data.action.toUpperCase(),
-      event: 'ISSUE',
-      title: data.issue.title,
-      subheader: data.issue.body,
-      user: data.sender.login,
-      user_html_url: data.sender.html_url,
-      description: [],
-      buttonText: 'Github link',
-      buttonVariant: 'contained',
-      html_url: data.issue.html_url,
-      avatar_url: data.issue.user.avatar_url+".jpg",
-      created_at: new Date(data.issue.created_at).toUTCString()
-    });
+    websocket.io.sockets.clients().sockets[clients[username]].emit("issue", createIssue(data));
   } else if ("commits" in data) {
     websocket.io.sockets.clients().sockets[clients[username]].emit("commit", {
       action: "NEW ",
@@ -101,12 +90,44 @@ function sendToDashboard(username, data) {
   }
 }
 
-function sendToSlack(user, body) {
+function sendToSlack(user, data) {
+  console.log("SEND TO SLACK: TO DB");
+  console.log(data);
+  if (user.notifications === undefined) {
+    user.notifications = [];
+  }
+  user.notifications.push(createIssue(data));
+  
+  requestPromise.postDatabase(user, "user", "post").then( (user) => {
+    console.log(user);
+  }).catch( (err) => {
+    console.log(err);
+  })
+  
   console.log("SEND TO SLACK");
-  requestPromise.postSlack({user, body}, "dashboardpayload", "post").then( (res) => {
+  
+  requestPromise.postSlack({user, data}, "dashboardpayload", "post").then( (res) => {
   }).catch((err) => {
     console.log(err);
   })
+  
+}
+
+function createIssue(data) {
+  return {
+    action: data.action.toUpperCase(),
+    event: 'ISSUE',
+    title: data.issue.title,
+    subheader: data.issue.body,
+    user: data.sender.login,
+    user_html_url: data.sender.html_url,
+    description: [],
+    buttonText: 'Github link',
+    buttonVariant: 'contained',
+    html_url: data.issue.html_url,
+    avatar_url: data.issue.user.avatar_url+".jpg",
+    created_at: new Date(data.issue.created_at).toUTCString()
+  }
 }
 
 

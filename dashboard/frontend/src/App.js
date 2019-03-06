@@ -60,6 +60,14 @@ class App extends Component {
     socket.on('user', function(data){
       console.log("user");
       console.log(data);
+      if (data.notifications !== undefined) {
+        data.notifications.forEach(notification => {
+          tiers.push( notification );
+        });
+      }
+      
+      
+      this.setState({});
     }.bind(this));
 
     socket.on('issue', function(data){

@@ -54,62 +54,76 @@ function createHook(method, user, url) {
     });
 }
 
-function getOrganizations(user) {
+function getOrganizations(username) {
 
-    var options = {
-        method: "GET",
-        uri: 'https://api.github.com/user/orgs',
-        secure: true,
-        json: true,
-        body: {
-            name: "web",
-            active: true,
-            
-            config: {
-                insecure_ssl: "1",
-                Authorization: 'token ' + user.githubAccessToken,
-                content_type: "json",
-                secret: SECRET,
-            },
-        },
-        headers: {
-            Accept: "application/vnd.github.v3+json",
-            Authorization: 'token ' + user.githubAccessToken,
-            'User-Agent': 'Request-Promise'
-        }
-    }
+    console.log("GETORGANIZATIONS");
+    console.log(username);
     return new Promise((resolve, reject) => {
-        rp(options)
-        .then(function (response) {
-            var databaseUser = user;
-            databaseUser["organizations"] = [];
-            response.forEach(element => {
-                databaseUser["organizations"].push(element.login);
-                createHook("GET", user, element.hooks_url).then( (res) => {
-                    console.log("Hook for " + element.hooks_url + " already exist.");
-                }).catch( (err) => {
-                    createHook("POST", user, element.hooks_url).then( (res) => {
-                        console.log("CREATE HOOK RESPONSE");
-                        console.log(res);
+        postDatabase({ username: username }, "user", "get").then( (user) => {
+            console.log(user.data);
+
+            var options = {
+                method: "GET",
+                uri: 'https://api.github.com/user/orgs',
+                secure: true,
+                json: true,
+                body: {
+                    name: "web",
+                    active: true,
+                    
+                    config: {
+                        insecure_ssl: "1",
+                        Authorization: 'token ' + user.data.githubAccessToken,
+                        content_type: "json",
+                        secret: SECRET,
+                    },
+                },
+                headers: {
+                    Accept: "application/vnd.github.v3+json",
+                    Authorization: 'token ' + user.data.githubAccessToken,
+                    'User-Agent': 'Request-Promise'
+                }
+            }
+            
+            rp(options)
+            .then(function (response) {
+                
+
+                var databaseUser = user.data;
+                databaseUser["organizations"] = [];
+                response.forEach(element => {
+                    databaseUser["organizations"].push(element.login);
+                    createHook("GET", user.data, element.hooks_url).then( (res) => {
+                        console.log("Hook for " + element.hooks_url + " already exist.");
                     }).catch( (err) => {
-                        console.log("ERROR POST HOOK");
-                        console.log(element.hooks_url);
+                        createHook("POST", user.data, element.hooks_url).then( (res) => {
+                            console.log("CREATE HOOK RESPONSE");
+                            console.log(res);
+                        }).catch( (err) => {
+                            console.log("ERROR POST HOOK");
+                            console.log(element.hooks_url);
+                        })
                     })
-                })
+                });
+                
+                postDatabase(databaseUser, "user", "post").then( () => {
+                    console.log("POST to database success in RP");
+                    resolve(user.data);
+                }).catch( (err) => {
+                    console.log("POST to database ERROR in RP");
+                    console.log(err);
+                });
+                
+            })
+            .catch(function (err) {
+                console.log("rp error: " + err);
+                reject(err);
             });
             
-            postDatabase(databaseUser, "user", "post").then( () => {
-                console.log("POST to database success in RP");
-            }).catch( (err) => {
-                console.log("POST to database ERROR in RP");
-                console.log(err);
-            });
-            
+
+        }).catch( (err) => {
+            console.log(err);
         })
-        .catch(function (err) {
-            console.log("rp error: " + err);
-            reject(err);
-        });
     });
 }
 

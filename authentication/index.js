@@ -118,7 +118,7 @@ router.get('/auth/slack', passport.authorize('slack'));
 
 router.get('/auth/slack/callback', 
   passport.authorize('slack', { failureRedirect: '/auth/slack' }), async function (ctx) {
-    var token = jwt.sign({ user: user }, SECRET, {expiresIn: "1d"});
+    var token = jwt.sign({ username: user.username }, SECRET, {expiresIn: "1d"});
     ctx.cookies.set("jwt", token, {httpOnly: false, domain: URL});
     ctx.redirect('https://'+URL+'/dashboard');
   });

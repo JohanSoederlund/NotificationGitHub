@@ -46,7 +46,6 @@ function saveNewUser(user) {
         } 
         findUser({username: user.username}).then( (existingUser) => {
             console.log("EXISTINGUSER");
-            console.log(existingUser);
             if (existingUser.value === null) {
                 user.save( (err, saved)=> {
                     if(err) reject({value: err, success: false});
@@ -71,18 +70,28 @@ function updateUser(user, existingUser) {
             new: true,
             useFindAndModify: false
         }
-        let usr = {githubId: user.githubId, username: user.username, githubAccessToken: user.githubAccessToken, slackId: "", slackAccessToken: "", notifications: []};
+        let usr = {githubId: user.githubId, username: user.username, githubAccessToken: user.githubAccessToken, slackId: "", slackAccessToken: ""};
         if ('slackId' in user) usr.slackId = user.slackId;
         if ('slackAccessToken' in user) usr.slackAccessToken = user.slackAccessToken;
-        if (user.hasOwnProperty('organizations')) usr.organizations = user.organizations;
+        //if (user.hasOwnProperty('organizations')) usr.organizations = user.organizations;
         if (user.hasOwnProperty('settings')) usr.settings = user.settings;
-        if (existingUser.hasOwnProperty('notifications')) usr.notifications = existingUser.notifications;
+        
+        /*
+        if (user.hasOwnProperty('notifications')) usr.notifications = existingUser.notifications;
         if (user.hasOwnProperty('notifications')) {
             user.notifications.forEach(element => {
                 usr.notifications.push(element);
             });
         }
+        */
+        //if (user.hasOwnProperty('notifications')) usr.notifications = user.notifications;
+        if ('notifications' in user && user.notifications !== undefined) usr.notifications = user.notifications;
+        if ('organizations' in user && user.organizations !== undefined) usr.organizations = user.organizations;
         
+        console.log(user)
+        console.log("UPDATE USER")
+        console.log(usr);
+
         UserModel.findOneAndUpdate({username: user.username}, usr, option, (err, updated) => {
             if (err) reject(err);
             resolve({value: updated, success: true});
@@ -95,7 +104,6 @@ function findUser(user) {
         UserModel.findOne(user)
         .then((user) => {
             console.log("user");
-            console.log(user);
             resolve({value: user, success: true});
         })
         .catch((error) => {
@@ -109,7 +117,6 @@ function findUsers() {
         UserModel.find({})
         .then((users) => {
             console.log("users");
-            console.log(users);
             resolve({value: users, success: true});
         })
         .catch((error) => {
