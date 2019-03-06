@@ -72,9 +72,10 @@ function updateUser(user, existingUser) {
             useFindAndModify: false
         }
         let usr = {githubId: user.githubId, username: user.username, githubAccessToken: user.githubAccessToken, slackId: "", slackAccessToken: "", notifications: []};
-        if (user.hasOwnProperty('slackId')) usr.slackId = user.slackId;
-        if (user.hasOwnProperty('slackAccessToken')) usr.slackAccessToken = user.slackAccessToken;
+        if ('slackId' in user) usr.slackId = user.slackId;
+        if ('slackAccessToken' in user) usr.slackAccessToken = user.slackAccessToken;
         if (user.hasOwnProperty('organizations')) usr.organizations = user.organizations;
+        if (user.hasOwnProperty('settings')) usr.settings = user.settings;
         if (existingUser.hasOwnProperty('notifications')) usr.notifications = existingUser.notifications;
         if (user.hasOwnProperty('notifications')) {
             user.notifications.forEach(element => {

@@ -49,7 +49,6 @@ router.post("/webhook", async function (ctx) {
   console.log(data.organization.login);
   requestPromise.postDatabase({}, "users", "get").then( (users) => {
     console.log(users.data);
-    
 
     users.data.forEach(user => {
       console.log(user);
@@ -57,13 +56,6 @@ router.post("/webhook", async function (ctx) {
         console.log(true);
         if (clients.hasOwnProperty(user.username)) sendToDashboard(user.username, data);
         else sendToSlack(user, data);
-        
-        //for ( var property in clients ) {
-          //console.log("FOR");
-          //if (property === user.username) sendToDashboard(user.username, data);
-          //else sendToSlack(user, data);
-        //}
-        //if (property === user.username) sendToDashboard(user.username, data);
       }
     });
   }).catch((err)=> {
@@ -111,6 +103,10 @@ function sendToDashboard(username, data) {
 
 function sendToSlack(user, body) {
   console.log("SEND TO SLACK");
+  requestPromise.postSlack({user, body}, "dashboardpayload", "post").then( (res) => {
+  }).catch((err) => {
+    console.log(err);
+  })
 }
 
 

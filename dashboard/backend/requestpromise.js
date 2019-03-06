@@ -133,7 +133,28 @@ function postDatabase(user, url, method) {
     });
 }
 
+function postSlack(user, url, method) {
+    return new Promise((resolve, reject) => {
+        axios({
+        method: method,
+        url: "http://localhost:3009/"+url,
+        data: {
+            user: user
+        }
+        })
+        .then((res) => {
+            resolve(res);
+        })
+        .catch((error) => {
+            console.log(error);
+            reject(error);
+        })
+        
+    });
+}
+
 module.exports = {
     getOrganizations,
-    postDatabase
+    postDatabase,
+    postSlack
 }
