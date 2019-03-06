@@ -66,24 +66,17 @@ function saveNewUser(user) {
 
 function updateUser(user, existingUser) {
     return new Promise((resolve, reject) => {
-        /*
-        try {
-            new UserModel(user);
-        } catch (error) {
-            reject({value: "Wrong schema error", success: false});
-        }
-        */
+        
         let option = {
             new: true,
             useFindAndModify: false
         }
         let usr = {githubId: user.githubId, username: user.username, githubAccessToken: user.githubAccessToken, slackId: "", slackAccessToken: "", notifications: []};
-        if ('slackId' in user) usr.slackId = user.slackId;
-        if ('slackAccessToken' in user) usr.slackAccessToken = user.slackAccessToken;
-        if ('organizations' in user) usr.organizations = user.organizations;
-        
-        if ('notifications' in existingUser) usr.notifications = existingUser.notifications;
-        if ('notifications' in user) {
+        if (user.hasOwnProperty('slackId')) usr.slackId = user.slackId;
+        if (user.hasOwnProperty('slackAccessToken')) usr.slackAccessToken = user.slackAccessToken;
+        if (user.hasOwnProperty('organizations')) usr.organizations = user.organizations;
+        if (existingUser.hasOwnProperty('notifications')) usr.notifications = existingUser.notifications;
+        if (user.hasOwnProperty('notifications')) {
             user.notifications.forEach(element => {
                 usr.notifications.push(element);
             });
@@ -110,6 +103,20 @@ function findUser(user) {
     });
 }
 
+function findUsers() {
+    return new Promise((resolve, reject) => {
+        UserModel.find({})
+        .then((users) => {
+            console.log("users");
+            console.log(users);
+            resolve({value: users, success: true});
+        })
+        .catch((error) => {
+            reject({value: "Invalid user credentials", success: false});
+        });
+    });
+}
+
 
 module.exports = {
     connectDatabase,
@@ -117,5 +124,6 @@ module.exports = {
     dropCollection,
     saveNewUser,
     updateUser,
-    findUser
+    findUser,
+    findUsers
 }

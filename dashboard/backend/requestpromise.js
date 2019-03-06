@@ -126,6 +126,7 @@ function postDatabase(user, url, method) {
             resolve(res);
         })
         .catch((error) => {
+            console.log(error);
             reject(error);
         })
         

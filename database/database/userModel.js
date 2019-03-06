@@ -8,8 +8,8 @@ let userSchema = new mongoose.Schema({
     githubAccessToken: { type: String, required: true },
     slackId: { type: String},
     slackAccessToken: { type: String},
-    organizations: { required: false },
-    notifications: { required: false }
+    organizations: {  },
+    notifications: {  }
   });
 
 let User = mongoose.model('User', userSchema);

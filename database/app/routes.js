@@ -67,6 +67,27 @@ router.post("/user", async function (ctx) {
     
 });
 
+router.get("/users", async function (ctx) {
+    console.log(".get /users");
+    try {
+        await DatabaseManager.findUsers()
+        .then((result) => {
+            ctx.body = result.value;
+            if (result.success) {
+                ctx.response.status = 200;
+            } else {
+                console.log(JSON.stringify(result));
+                ctx.response.status = 400;
+            }
+        })
+    } catch (error) {
+        console.log(error);
+        ctx.response.status = 400;
+        ctx.body = error;
+    }
+    
+});
+
 /**
  * For development reasons, remove in production
  */
