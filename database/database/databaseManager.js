@@ -73,25 +73,10 @@ function updateUser(user, existingUser) {
         let usr = {githubId: user.githubId, username: user.username, githubAccessToken: user.githubAccessToken, slackId: "", slackAccessToken: ""};
         if ('slackId' in user) usr.slackId = user.slackId;
         if ('slackAccessToken' in user) usr.slackAccessToken = user.slackAccessToken;
-        //if (user.hasOwnProperty('organizations')) usr.organizations = user.organizations;
         if (user.hasOwnProperty('settings')) usr.settings = user.settings;
-        
-        /*
-        if (user.hasOwnProperty('notifications')) usr.notifications = existingUser.notifications;
-        if (user.hasOwnProperty('notifications')) {
-            user.notifications.forEach(element => {
-                usr.notifications.push(element);
-            });
-        }
-        */
-        //if (user.hasOwnProperty('notifications')) usr.notifications = user.notifications;
         if ('notifications' in user && user.notifications !== undefined) usr.notifications = user.notifications;
         if ('organizations' in user && user.organizations !== undefined) usr.organizations = user.organizations;
-        
-        console.log(user)
-        console.log("UPDATE USER")
-        console.log(usr);
-
+       
         UserModel.findOneAndUpdate({username: user.username}, usr, option, (err, updated) => {
             if (err) reject(err);
             resolve({value: updated, success: true});
@@ -125,6 +110,25 @@ function findUsers() {
     });
 }
 
+function deleteNotifications(user) {
+    return new Promise((resolve, reject) => {
+        UserModel.findOne({username: user.username})
+        .then((user) => {
+            user.notifications = [];
+            updateUser(user)
+            .then((user) => {
+                resolve({value: user, success: true});
+            })
+            .catch((error) => {
+                reject({value: "Invalid user credentials", success: false});
+            });
+        })
+        .catch((error) => {
+            reject({value: "Invalid user credentials", success: false});
+        });
+    });
+}
+
 
 module.exports = {
     connectDatabase,
@@ -133,5 +137,6 @@ module.exports = {
     saveNewUser,
     updateUser,
     findUser,
-    findUsers
+    findUsers,
+    deleteNotifications
 }

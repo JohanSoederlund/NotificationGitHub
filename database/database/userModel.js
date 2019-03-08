@@ -9,8 +9,7 @@ let userSchema = new mongoose.Schema({
     slackId: { type: String},
     slackAccessToken: { type: String},
     organizations: { type: Object },
-    notifications: { type: Object },
-    settings: {  }
+    notifications: { type: Object }
   });
 
 let User = mongoose.model('User', userSchema);

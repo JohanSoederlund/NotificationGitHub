@@ -38,13 +38,7 @@ function createHook(method, user, url) {
         rp(options)
         .then(function (response) {
             console.log("response in createHook");
-            //console.log(response);
-            //var gitHubUser = {githubId: user.githubId, username: user.username, accessToken: user.accessToken, webHooks: response.url};
-            //console.log(response);
-            /*
-            postDatabase(user, "user", "post").then( (result) => {
-              }).catch ( (err)=> {console.log("postToDatabase ERROR");});
-              */
+            
             resolve(response);
         })
         .catch(function (err) {
@@ -87,11 +81,24 @@ function getOrganizations(username) {
             
             rp(options)
             .then(function (response) {
-                
-
                 var databaseUser = user.data;
-                databaseUser["organizations"] = [];
+                databaseUser["organizations"] = [user.data.username];
+
+                createHook("GET", user.data, "https://api.github.com/users/"+user.data.username+"/repos").then( (res) => {
+                    res.forEach(element => {
+                        createHook("POST", user.data, element.hooks_url).then( (res) => {
+                            console.log("CREATE PUBLIC HOOK RESPONSE");
+                            console.log(res);
+                        }).catch( (err) => {
+                            console.log("ERROR POST HOOK");
+                        })
+                    })
+                }).catch( (err) => {
+                    console.log("ERROR");
+                })
+                /*
                 response.forEach(element => {
+                    
                     databaseUser["organizations"].push(element.login);
                     createHook("GET", user.data, element.hooks_url).then( (res) => {
                         console.log("Hook for " + element.hooks_url + " already exist.");
@@ -104,6 +111,7 @@ function getOrganizations(username) {
                             console.log(element.hooks_url);
                         })
                     })
+                    
                 });
                 
                 postDatabase(databaseUser, "user", "post").then( () => {
@@ -113,7 +121,7 @@ function getOrganizations(username) {
                     console.log("POST to database ERROR in RP");
                     console.log(err);
                 });
-                
+                */
             })
             .catch(function (err) {
                 console.log("rp error: " + err);

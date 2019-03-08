@@ -17,15 +17,17 @@ websocket.io.on('connection', (client) => {
   client.on('getUser', token => { 
     var decoded = jwt.verify(token, SECRET);
     console.log("issues on");
-    //client.emit("user", decoded);
     clients[decoded.username] = client.id;
     
     requestPromise.getOrganizations(decoded.username).then( (res) => {
-      //console.log(res);
       client.emit("user", res);
+      requestPromise.postDatabase(decoded, "user", "delete").then( (res) => {
+        console.log("Successful deleteion");
+      }).catch((err) => {
+        console.log(err);
+      })
     }).catch((err) => {
-      //console.log(err);
-      
+      console.log(err);
     })
   });
   
@@ -46,23 +48,32 @@ websocket.io.on('connection', (client) => {
 router.post("/webhook", async function (ctx) {
   ctx.response.status = 200;
   let data = ctx.request.body;
-  console.log(clients);
-  console.log(data.organization.login);
-  requestPromise.postDatabase({}, "users", "get").then( (users) => {
-    console.log(users.data);
+  if (data.organization === undefined) {
 
-    users.data.forEach(user => {
-      console.log(user);
-      if (user.organizations.includes(data.organization.login)) {
-        console.log(true);
-        if (clients.hasOwnProperty(user.username)) sendToDashboard(user.username, data);
-        else sendToSlack(user, data);
-      }
-    });
-  }).catch((err)=> {
-    console.log("DATABAS FEL");
-  })
-
+    requestPromise.postDatabase({username: data.repository.owner.login}, "user", "get").then( (user) => {
+      if (clients.hasOwnProperty(data.repository.owner.login)) sendToDashboard(data.repository.owner.login, data);
+      else sendToSlack(user.data, data);
+      
+    })
+    
+  } else {
+    console.log(clients);
+    console.log(data.organization.login);
+    requestPromise.postDatabase({}, "users", "get").then( (users) => {
+      console.log(users.data);
+  
+      users.data.forEach(user => {
+        console.log(user);
+        if (user.organizations.includes(data.organization.login)) {
+          console.log(true);
+          if (clients.hasOwnProperty(user.username)) sendToDashboard(user.username, data);
+          else sendToSlack(user, data);
+        }
+      });
+    }).catch((err)=> {
+      console.log("DATABAS FEL");
+    })
+  }
   ctx.body = {};
 });
 
@@ -73,26 +84,12 @@ function sendToDashboard(username, data) {
   if ("issue" in data) {
     websocket.io.sockets.clients().sockets[clients[username]].emit("issue", createIssue(data));
   } else if ("commits" in data) {
-    websocket.io.sockets.clients().sockets[clients[username]].emit("commit", {
-      action: "NEW ",
-      event: 'COMMIT',
-      title: data.repository.full_name,
-      subheader: data.commits[0].message,
-      user: data.head_commit.author.username,
-      user_html_url: data.sender.html_url,
-      description: [],
-      buttonText: 'Github link',
-      buttonVariant: 'contained',
-      html_url: data.commits[0].url,
-      avatar_url: data.sender.avatar_url+".jpg",
-      created_at: new Date(data.commits[0].timestamp).toUTCString()
-    });
+    websocket.io.sockets.clients().sockets[clients[username]].emit("commit", createCommit(data) );
   }
 }
 
 function sendToSlack(user, data) {
   console.log("SEND TO SLACK: TO DB");
-  console.log(data);
   if (user.notifications === undefined) {
     user.notifications = [];
   }
@@ -127,6 +124,23 @@ function createIssue(data) {
     html_url: data.issue.html_url,
     avatar_url: data.issue.user.avatar_url+".jpg",
     created_at: new Date(data.issue.created_at).toUTCString()
+  }
+}
+
+function createCommit(data) {
+  return {
+    action: "NEW ",
+    event: 'COMMIT',
+    title: data.repository.full_name,
+    subheader: data.commits[0].message,
+    user: data.head_commit.author.username,
+    user_html_url: data.sender.html_url,
+    description: [],
+    buttonText: 'Github link',
+    buttonVariant: 'contained',
+    html_url: data.commits[0].url,
+    avatar_url: data.sender.avatar_url+".jpg",
+    created_at: new Date(data.commits[0].timestamp).toUTCString()
   }
 }
 

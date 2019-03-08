@@ -46,8 +46,6 @@ router.post("/user", async function (ctx) {
         let user = new UserModel(usr);
         await DatabaseManager.saveNewUser(user)
         .then( (result) => {
-            console.log("\nLAST");
-            //console.log(result);
             ctx.body = result.value;
             if (result.success) {
                 ctx.response.status = 201;
@@ -57,7 +55,34 @@ router.post("/user", async function (ctx) {
         });
         
     } catch (error) {
-        console.log("FUCKING HELL OF DB");
+        ctx.response.status = 400;
+        ctx.body = error;
+    }
+    
+});
+
+router.delete("/user", async function (ctx) {
+    
+    try {
+        console.log("DELETE /user");
+        let usr = ctx.request.body.user;
+        if (usr["_id"] !== undefined) {
+            delete usr["_id"]; 
+        }
+        ctx.body = usr;
+        let user = new UserModel(usr);
+        await DatabaseManager.deleteNotifications(user)
+        .then( (result) => {
+            console.log(result);
+            ctx.body = result.value;
+            if (result.success) {
+                ctx.response.status = 200;
+            } else {
+                ctx.response.status = 200;
+            }
+        });
+        
+    } catch (error) {
         ctx.response.status = 400;
         ctx.body = error;
     }
@@ -84,6 +109,7 @@ router.get("/users", async function (ctx) {
     }
     
 });
+
 
 /**
  * For development reasons, remove in production

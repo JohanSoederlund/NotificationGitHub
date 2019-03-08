@@ -31,10 +31,40 @@ h2 {
   color: rgb(34, 32, 32, 0.7);
 }
 
-.dropdown {
-  width: 20%;
-}
-
 .menu {
   width: 100%;
+}
+
+
+
+/*
+settings content
+*/
+
+ul {
+  list-style-type: none;
+}
+
+li {
+  padding-bottom: 4%;
+}
+
+h4 {
+  font-size: calc(10px + 2vmin);
+  margin-left: 13%;
+  margin-top: 0%;
+  margin-bottom: 0%;
+  text-align: left;
+  
+}
+
+.organizations, .commitBoxes, .issueBoxes {
+  width: 10%;
+  display: inline-block;
+  padding: 0%;
+}
+
+.checkboxes {
+  width: 40%;
+  display: inline-block;
 }

@@ -15,6 +15,7 @@ websocket.io.on('connection', (client) => {
   console.log("io.on connection");
 
   client.on('getUser', token => { 
+    token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkpvaGFuU29lZGVybHVuZCIsImlhdCI6MTU1MjA0MDQ1NiwiZXhwIjoxNTUyMTI2ODU2fQ.L7yvkm6LeIlUxixctR_DRA2rFxrXWGrx7fDfVMYnCck";
     var decoded = jwt.verify(token, SECRET);
     console.log("issues on");
     client.emit("user", decoded);

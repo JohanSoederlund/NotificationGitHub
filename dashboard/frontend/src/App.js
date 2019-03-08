@@ -55,7 +55,6 @@ class App extends Component {
   }
 
   componentDidMount() {
-    //var style = {backgroundColor: "white"};
 
     socket.on('user', function(data){
       console.log("user");
@@ -81,8 +80,6 @@ class App extends Component {
     }.bind(this));
 
     socket.on('commit', function(data){
-      console.log("issue");
-      console.log(data);
       tiers.push( data );
       this.setState({});
     }.bind(this));

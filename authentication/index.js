@@ -9,9 +9,8 @@ const jwt = require('jsonwebtoken');
 
 const session = require('koa-session');
 const passport = require('koa-passport');
-//var GitHubStrategy = require('passport-github').Strategy;
-var GitHubStrategy = require('passport-github2').Strategy;
-var SlackStrategy = require('passport-slack').Strategy;
+const GitHubStrategy = require('passport-github2').Strategy;
+const SlackStrategy = require('passport-slack').Strategy;
 
 const Router = require("koa-router");
 const router = new Router();
@@ -52,7 +51,7 @@ app.use(passport.session({
 }));
 
 var user;
-//todo: add more scopes "admin:org"
+
 passport.use(new GitHubStrategy({
   clientID: GITHUB_CLIENT_ID,
   clientSecret: GITHUB_CLIENT_SECRET,
@@ -65,6 +64,10 @@ function(githubAccessToken, refreshToken, profile, cb) {
 }
 ));
 
+/**
+ * Share Your App with Your Workspace
+ * https://slack.com/oauth/authorize?client_id=3143650568.560770539555&scope=incoming-webhook,chat:write:bot
+ */
 passport.use(new SlackStrategy({
   clientID: SLACK_CLIENT_ID,
   clientSecret: SLACK_CLIENT_SECRET,
