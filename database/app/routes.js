@@ -43,8 +43,8 @@ router.post("/user", async function (ctx) {
         }
         ctx.body = usr;
         
-        let user = new UserModel(usr);
-        await DatabaseManager.saveNewUser(user)
+        //let user = new UserModel(usr);
+        await DatabaseManager.saveNewUser(usr)
         .then( (result) => {
             ctx.body = result.value;
             if (result.success) {
@@ -117,7 +117,8 @@ router.get("/users", async function (ctx) {
 router.get("/drop", async function (ctx) {
     ctx.response.status = 307;
     await DatabaseManager.dropCollection("users").then( (result) => {
-        ctx.redirect('/');
+        //ctx.redirect('/');
+        ctx.body = {ok: "ok"};
     })
 });
 

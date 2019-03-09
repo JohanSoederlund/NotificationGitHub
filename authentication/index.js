@@ -59,6 +59,7 @@ passport.use(new GitHubStrategy({
   scope: ["admin:org_hook", "repo"]
 },
 function(githubAccessToken, refreshToken, profile, cb) {
+  console.log("STRATEGY");
   user = {githubId: profile.id, username: profile.username, githubAccessToken: githubAccessToken, slackId: "", slackAccessToken: ""};
   return cb(null, user);
 }
@@ -73,6 +74,7 @@ passport.use(new SlackStrategy({
   clientSecret: SLACK_CLIENT_SECRET,
   scope: ['chat:write:user']
 }, (slackAccessToken, refreshToken, profile, done) => {
+  console.log("STRATEGY2");
   user.slackId = profile.user.id;
   user.slackAccessToken = slackAccessToken;
   postDatabase(user, "user", "post").then( (result) => {
@@ -113,7 +115,7 @@ app.use(async (ctx, next) => {
 router.get("/login", passport.authenticate('github'));
 
 router.get("/auth", passport.authenticate('github'), async function (ctx) {
-  
+    console.log("AUTH");
     ctx.redirect('https://'+URL+'/auth/slack');
 });
 

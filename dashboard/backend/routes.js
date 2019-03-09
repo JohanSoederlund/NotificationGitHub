@@ -33,7 +33,6 @@ websocket.io.on('connection', (client) => {
   
 
   client.on('disconnect', () => {
-    console.log(clients);
     console.log("DISCONNECTED");
     for (var key in clients) {
       if (clients[key] === client.id) {
@@ -41,7 +40,6 @@ websocket.io.on('connection', (client) => {
         break;
       } 
     }
-    console.log(clients);
   });
 });
 
@@ -57,15 +55,10 @@ router.post("/webhook", async function (ctx) {
     })
     
   } else {
-    console.log(clients);
-    console.log(data.organization.login);
     requestPromise.postDatabase({}, "users", "get").then( (users) => {
-      console.log(users.data);
   
       users.data.forEach(user => {
-        console.log(user);
         if (user.organizations.includes(data.organization.login)) {
-          console.log(true);
           if (clients.hasOwnProperty(user.username)) sendToDashboard(user.username, data);
           else sendToSlack(user, data);
         }
@@ -79,8 +72,6 @@ router.post("/webhook", async function (ctx) {
 
 
 function sendToDashboard(username, data) {
-  console.log("ISSUE");
-  console.log(username);
   if ("issue" in data) {
     websocket.io.sockets.clients().sockets[clients[username]].emit("issue", createIssue(data));
   } else if ("commits" in data) {
@@ -96,7 +87,6 @@ function sendToSlack(user, data) {
   user.notifications.push(createIssue(data));
   
   requestPromise.postDatabase(user, "user", "post").then( (user) => {
-    console.log(user);
   }).catch( (err) => {
     console.log(err);
   })

@@ -23,8 +23,8 @@ class App extends Component {
         user: user
     }
 
-    this.onSelect = this.onSelect.bind(this);
-    this.renderListItem = this.renderListItem.bind(this);
+    this.handleCommitSelect = this.handleCommitSelect.bind(this);
+    this.handleIssueSelect = this.handleIssueSelect.bind(this);
   }
 
   componentDidMount() {

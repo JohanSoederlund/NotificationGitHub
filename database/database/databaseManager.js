@@ -41,9 +41,18 @@ function dropCollection(collection) {
 
 function saveNewUser(user) {
     return new Promise((resolve, reject) => {
+        /*
         if(JSON.stringify(user.schema) !== JSON.stringify(UserModel.schema)) {
             reject({value: "Wrong schema error", success: false});
         } 
+        */
+        if (user.organizations === undefined) {
+            user.organizations = [];
+        }
+        if (user.notifications === undefined) {
+            user.notifications = [];
+        }
+        user = new UserModel(user);
         findUser({username: user.username}).then( (existingUser) => {
             console.log("EXISTINGUSER");
             if (existingUser.value === null) {
@@ -128,6 +137,7 @@ function deleteNotifications(user) {
         });
     });
 }
+
 
 
 module.exports = {

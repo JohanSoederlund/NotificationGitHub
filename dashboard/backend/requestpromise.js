@@ -8,32 +8,8 @@ const URL = process.env.URL;
 
 function createHook(method, user, url) {
 
-    //'https://api.github.com/repos/1dv023/js223zs-examination-3/hooks'
-    //'https://api.github.com/orgs/1dv612/hooks'
-    //'https://api.github.com/orgs/GitHubNotificationHub/hooks'
-    var options = {
-        method: method,
-        uri: url,
-        secure: true,
-        json: true,
-        body: {
-            name: "web",
-            active: true,
-            events: ["issues", "push"],
-            config: {
-                insecure_ssl: "1",
-                Authorization: 'token ' + user.githubAccessToken,
-                url: "https://"+URL+"/webhook",
-                content_type: "json",
-                secret: SECRET,
-            },
-        },
-        headers: {
-            Accept: "application/vnd.github.v3+json",
-            Authorization: 'token ' + user.githubAccessToken,
-            'User-Agent': 'Request-Promise'
-        }
-    }
+    var options = getOptions(method, user, url, ["issues", "push"]);
+    
     return new Promise((resolve, reject) => {
         rp(options)
         .then(function (response) {
@@ -48,91 +24,130 @@ function createHook(method, user, url) {
     });
 }
 
+/**
+ * Don't send hooks if already exists
+ */
 function getOrganizations(username) {
-
     console.log("GETORGANIZATIONS");
-    console.log(username);
     return new Promise((resolve, reject) => {
         postDatabase({ username: username }, "user", "get").then( (user) => {
+            var options = getOptions("GET", user.data, "https://api.github.com/user/orgs");
+            
             console.log(user.data);
 
-            var options = {
-                method: "GET",
-                uri: 'https://api.github.com/user/orgs',
-                secure: true,
-                json: true,
-                body: {
-                    name: "web",
-                    active: true,
-                    
-                    config: {
-                        insecure_ssl: "1",
-                        Authorization: 'token ' + user.data.githubAccessToken,
-                        content_type: "json",
-                        secret: SECRET,
-                    },
-                },
-                headers: {
-                    Accept: "application/vnd.github.v3+json",
-                    Authorization: 'token ' + user.data.githubAccessToken,
-                    'User-Agent': 'Request-Promise'
-                }
-            }
-            
             rp(options)
-            .then(function (response) {
-                var databaseUser = user.data;
-                databaseUser["organizations"] = [user.data.username];
-
-                createHook("GET", user.data, "https://api.github.com/users/"+user.data.username+"/repos").then( (res) => {
-                    res.forEach(element => {
-                        createHook("POST", user.data, element.hooks_url).then( (res) => {
-                            console.log("CREATE PUBLIC HOOK RESPONSE");
-                            console.log(res);
-                        }).catch( (err) => {
-                            console.log("ERROR POST HOOK");
-                        })
-                    })
-                }).catch( (err) => {
-                    console.log("ERROR");
-                })
-                /*
-                response.forEach(element => {
-                    
-                    databaseUser["organizations"].push(element.login);
-                    createHook("GET", user.data, element.hooks_url).then( (res) => {
-                        console.log("Hook for " + element.hooks_url + " already exist.");
-                    }).catch( (err) => {
-                        createHook("POST", user.data, element.hooks_url).then( (res) => {
-                            console.log("CREATE HOOK RESPONSE");
-                            console.log(res);
-                        }).catch( (err) => {
-                            console.log("ERROR POST HOOK");
-                            console.log(element.hooks_url);
-                        })
-                    })
-                    
-                });
+            .then(function (orgResponse) {
                 
-                postDatabase(databaseUser, "user", "post").then( () => {
-                    console.log("POST to database success in RP");
-                    resolve(user.data);
+                var databaseUser = user.data;
+                //Users public repos will always have index 0 in organizations array
+                if (databaseUser.organizations.length === 0) databaseUser["organizations"] = [ { name: user.data.username, commit: true, issue: true, hooks: [] }];
+
+                console.log(databaseUser);
+                
+                createHook("GET", user.data, "https://api.github.com/users/"+user.data.username+"/repos").then( (publicRepoResponse) => {
+                    
+                    let missingHooksUrls = findInArray(databaseUser, publicRepoResponse);
+                    missingHooksUrls.forEach( (element) => {
+                        databaseUser.organizations[0].hooks.push(element);
+                    })
+                    
+                    
+                    missingHooksUrls.forEach(element => {
+                        
+                        createHook("POST", user.data, element).then( (res) => {
+                            console.log("CREATE PUBLIC HOOK RESPONSE");
+
+                            
+                        }).catch( (err) => {
+                            console.log("ERROR PUBLIC POST HOOK");
+                        })
+                    })
+                    
+                   console.log("\n\nDATABASEUSER");
+                   console.log(databaseUser);
+                   console.log("\n\n");
+                    
+                    orgResponse.forEach(element => {
+                        let hookExist = false;
+                        databaseUser.organizations.forEach( (org) => {
+                            console.log(org);
+                            if (org.hooks.length > 0 && element.hooks_url === org.hooks[0]) {
+                                hookExist = true;
+                            }
+                        })
+                        if (!hookExist) {
+                            databaseUser["organizations"].push( { name: element.login, commit: true, issue: true, hooks: [element.hooks_url] });
+                            createHook("POST", user.data, element.hooks_url).then( (res) => {
+                                console.log("CREATE HOOK RESPONSE");
+                            }).catch( (err) => {
+                                console.log("ERROR ORG POST HOOK");
+                            })
+                        }
+                        
+                        /*
+                        createHook("GET", user.data, element.hooks_url).then( (res) => {
+                            console.log("Hook for " + element.hooks_url + " already exist.");
+                        }).catch( (err) => {
+                            console.log("ERROR POST HOOK");
+                            
+                            createHook("POST", user.data, element.hooks_url).then( (res) => {
+                                console.log("CREATE HOOK RESPONSE");
+                            }).catch( (err) => {
+                                console.log("ERROR POST HOOK");
+                            })
+                            
+                        })
+                        */
+                    });
+                    
+
+                    postDatabase(databaseUser, "user", "post").then( () => {
+                        console.log("POST to database success in RP");
+                        resolve(user.data);
+                    }).catch( (err) => {
+                        console.log("POST to database ERROR in RP");
+                    });
+                    
                 }).catch( (err) => {
-                    console.log("POST to database ERROR in RP");
+                    console.log("ERROR get public repos");
                     console.log(err);
-                });
-                */
+                })
+
+                
             })
             .catch(function (err) {
-                console.log("rp error: " + err);
+                console.log("rp error1: " + err);
                 reject(err);
             });
-            
 
         }).catch( (err) => {
             console.log(err);
         })
+        
     });
+}
+
+function findInArray(user, repos) {
+    let missingHooks = [];
+
+    user.organizations.find( org => {
+        if (org.name === user.username) {
+            
+            repos.forEach( (repo) =>  {
+                let found = false;
+                org.hooks.forEach( (hook) =>  {
+                    if (repo.hooks_url === hook) {
+                        found = true;
+                    }
+                })
+                if (!found) missingHooks.push(repo.hooks_url);
+
+            })
+            
+        }
+    });
+
+    return missingHooks;
 }
 
 function postDatabase(user, url, method) {
@@ -173,6 +188,36 @@ function postSlack(user, url, method) {
         })
         
     });
+}
+
+function getOptions(method, user, url, events) {
+
+    console.log("\n\n\n");
+    console.log(user.data);
+    //IF ERROR CHECK CONFIG url and events
+    return {
+        method: method,
+        uri: url,
+        secure: true,
+        json: true,
+        body: {
+            name: "web",
+            active: true,
+            events: events,
+            config: {
+                insecure_ssl: "1",
+                Authorization: 'token ' + user.githubAccessToken,
+                url: "https://"+URL+"/webhook",
+                content_type: "json",
+                secret: SECRET,
+            },
+        },
+        headers: {
+            Accept: "application/vnd.github.v3+json",
+            Authorization: 'token ' + user.githubAccessToken,
+            'User-Agent': 'Request-Promise'
+        }
+    }
 }
 
 module.exports = {
