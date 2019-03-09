@@ -4,15 +4,11 @@ const Koa = require("koa");
 const BodyParser = require("koa-bodyparser");
 const logger = require('koa-logger');
 const helmet = require("koa-helmet");
-const fs = require("fs");
-const kJwt = require('koa-jwt');
 
 const DatabaseManager = require("../database/databaseManager");
 const router = require("../app/routes");
 
 const app = new Koa();
-
-const SECRET = process.env.SECRET;
 
 app.use(BodyParser());
 app.use(logger());
@@ -31,9 +27,6 @@ app.use(function(ctx, next){
       }
     });
 });
-
-//In production remove /^\//,
-//app.use(kJwt({ secret: SECRET }).unless({ path: [/^\//, /^\/user/] }));
 
 app.use(async (ctx, next) => {
     ctx.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, HEAD');

@@ -9,9 +9,6 @@ const router = require("./routes");
 
 const app = new Koa();
 
-const SECRET = process.env.SECRET;
-const PORT = process.env.SECRET;
-
 app.use(BodyParser());
 app.use(logger());
 app.use(helmet());

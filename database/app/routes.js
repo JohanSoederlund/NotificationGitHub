@@ -12,8 +12,6 @@ const SECRET = process.env.SECRET;
 const router = new Router();
 
 router.get("/user", async function (ctx) {
-    console.log(".get /user");
-    //console.log(ctx.request.body.user.username);
     try {
         await DatabaseManager.findUser({username: ctx.request.body.user.username})
         .then((result) => {
@@ -21,7 +19,6 @@ router.get("/user", async function (ctx) {
             if (result.success) {
                 ctx.response.status = 200;
             } else {
-                console.log(JSON.stringify(result));
                 ctx.response.status = 400;
             }
         })
@@ -34,16 +31,13 @@ router.get("/user", async function (ctx) {
 });
 
 router.post("/user", async function (ctx) {
-    
     try {
-        console.log("POST /user");
         let usr = ctx.request.body.user;
         if (usr["_id"] !== undefined) {
             delete usr["_id"]; 
         }
         ctx.body = usr;
-        
-        //let user = new UserModel(usr);
+
         await DatabaseManager.saveNewUser(usr)
         .then( (result) => {
             ctx.body = result.value;
@@ -58,22 +52,19 @@ router.post("/user", async function (ctx) {
         ctx.response.status = 400;
         ctx.body = error;
     }
-    
 });
 
 router.delete("/user", async function (ctx) {
-    
     try {
-        console.log("DELETE /user");
         let usr = ctx.request.body.user;
         if (usr["_id"] !== undefined) {
             delete usr["_id"]; 
         }
         ctx.body = usr;
         let user = new UserModel(usr);
+
         await DatabaseManager.deleteNotifications(user)
         .then( (result) => {
-            console.log(result);
             ctx.body = result.value;
             if (result.success) {
                 ctx.response.status = 200;
@@ -86,11 +77,9 @@ router.delete("/user", async function (ctx) {
         ctx.response.status = 400;
         ctx.body = error;
     }
-    
 });
 
 router.get("/users", async function (ctx) {
-    console.log(".get /users");
     try {
         await DatabaseManager.findUsers()
         .then((result) => {
@@ -98,18 +87,14 @@ router.get("/users", async function (ctx) {
             if (result.success) {
                 ctx.response.status = 200;
             } else {
-                console.log(JSON.stringify(result));
                 ctx.response.status = 400;
             }
         })
     } catch (error) {
-        console.log(error);
         ctx.response.status = 400;
         ctx.body = error;
     }
-    
 });
-
 
 /**
  * For development reasons, remove in production
@@ -117,7 +102,6 @@ router.get("/users", async function (ctx) {
 router.get("/drop", async function (ctx) {
     ctx.response.status = 307;
     await DatabaseManager.dropCollection("users").then( (result) => {
-        //ctx.redirect('/');
         ctx.body = {ok: "ok"};
     })
 });

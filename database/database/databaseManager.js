@@ -41,11 +41,6 @@ function dropCollection(collection) {
 
 function saveNewUser(user) {
     return new Promise((resolve, reject) => {
-        /*
-        if(JSON.stringify(user.schema) !== JSON.stringify(UserModel.schema)) {
-            reject({value: "Wrong schema error", success: false});
-        } 
-        */
         if (user.organizations === undefined) {
             user.organizations = [];
         }
@@ -54,7 +49,6 @@ function saveNewUser(user) {
         }
         user = new UserModel(user);
         findUser({username: user.username}).then( (existingUser) => {
-            console.log("EXISTINGUSER");
             if (existingUser.value === null) {
                 user.save( (err, saved)=> {
                     if(err) reject({value: err, success: false});
@@ -85,6 +79,7 @@ function updateUser(user, existingUser) {
         if (user.hasOwnProperty('settings')) usr.settings = user.settings;
         if ('notifications' in user && user.notifications !== undefined) usr.notifications = user.notifications;
         if ('organizations' in user && user.organizations !== undefined) usr.organizations = user.organizations;
+        else usr.organizations = existingUser.organizations;
        
         UserModel.findOneAndUpdate({username: user.username}, usr, option, (err, updated) => {
             if (err) reject(err);
@@ -97,7 +92,6 @@ function findUser(user) {
     return new Promise((resolve, reject) => {
         UserModel.findOne(user)
         .then((user) => {
-            console.log("user");
             resolve({value: user, success: true});
         })
         .catch((error) => {
@@ -110,7 +104,6 @@ function findUsers() {
     return new Promise((resolve, reject) => {
         UserModel.find({})
         .then((users) => {
-            console.log("users");
             resolve({value: users, success: true});
         })
         .catch((error) => {
@@ -137,8 +130,6 @@ function deleteNotifications(user) {
         });
     });
 }
-
-
 
 module.exports = {
     connectDatabase,

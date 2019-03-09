@@ -12,28 +12,22 @@ const router = new Router();
 
 var clients = {};
 websocket.io.on('connection', (client) => {
-  console.log("io.on connection");
 
   client.on('getUser', token => { 
     var decoded = jwt.verify(token, SECRET);
-    console.log("issues on");
     clients[decoded.username] = client.id;
     
     requestPromise.getOrganizations(decoded.username).then( (res) => {
       client.emit("user", res);
-      requestPromise.postDatabase(decoded, "user", "delete").then( (res) => {
-        console.log("Successful deleteion");
-      }).catch((err) => {
+      requestPromise.postDatabase(decoded, "user", "delete").then( (res) => {}).catch((err) => {
         console.log(err);
       })
     }).catch((err) => {
       console.log(err);
     })
   });
-  
 
   client.on('disconnect', () => {
-    console.log("DISCONNECTED");
     for (var key in clients) {
       if (clients[key] === client.id) {
         delete clients[key];
@@ -51,7 +45,6 @@ router.post("/webhook", async function (ctx) {
     requestPromise.postDatabase({username: data.repository.owner.login}, "user", "get").then( (user) => {
       if (clients.hasOwnProperty(data.repository.owner.login)) sendToDashboard(data.repository.owner.login, data);
       else sendToSlack(user.data, data);
-      
     })
     
   } else {
@@ -64,12 +57,11 @@ router.post("/webhook", async function (ctx) {
         }
       });
     }).catch((err)=> {
-      console.log("DATABAS FEL");
+      console.log(err);
     })
   }
   ctx.body = {};
 });
-
 
 function sendToDashboard(username, data) {
   if ("issue" in data) {
@@ -80,7 +72,6 @@ function sendToDashboard(username, data) {
 }
 
 function sendToSlack(user, data) {
-  console.log("SEND TO SLACK: TO DB");
   if (user.notifications === undefined) {
     user.notifications = [];
   }
@@ -91,13 +82,10 @@ function sendToSlack(user, data) {
     console.log(err);
   })
   
-  console.log("SEND TO SLACK");
-  
   requestPromise.postSlack({user, data}, "dashboardpayload", "post").then( (res) => {
   }).catch((err) => {
     console.log(err);
   })
-  
 }
 
 function createIssue(data) {
@@ -133,7 +121,6 @@ function createCommit(data) {
     created_at: new Date(data.commits[0].timestamp).toUTCString()
   }
 }
-
 
 //export default router;
 module.exports = {

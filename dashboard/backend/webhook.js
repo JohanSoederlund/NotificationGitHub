@@ -34,21 +34,15 @@ function createHook(user) {
     return new Promise((resolve, reject) => {
         rp(options)
         .then(function (response) {
-            console.log("response");
-            console.log(response);
             var gitHubUser = {githubId: user.githubId, username: user.username, accessToken: user.accessToken, webHooks: response.url};
             DatabaseManager.updateUser(gitHubUser).then( (res) => {
-                console.log("UPDATED USER");
-                console.log(res);
                 resolve(response);
             })
             .catch(function (err) {
-                console.log("updateUser error: " + err);
                 reject(err);
             });
         })
         .catch(function (err) {
-            console.log("rp error: " + err);
             reject(err);
         });
     });

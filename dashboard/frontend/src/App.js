@@ -45,20 +45,13 @@ class App extends Component {
 
   constructor(props) {
     super(props);
-    
-    console.log("CONSTRUCTOR");
-    console.log(Cookies.get('jwt'));
     socket.emit("getUser", Cookies.get('jwt'));
-    this.state = {
-        jwt: Cookies.get('jwt')
-    }
+    this.state = {}
   }
 
   componentDidMount() {
 
     socket.on('user', function(data){
-      console.log("user");
-      console.log(data);
       if (data.notifications !== undefined) {
         data.notifications.forEach(notification => {
           tiers.push( notification );
@@ -161,5 +154,3 @@ class App extends Component {
 }
 
 export default App;
-
-
