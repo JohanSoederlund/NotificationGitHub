@@ -64,7 +64,7 @@ function(githubAccessToken, refreshToken, profile, cb) {
 ));
 
 /**
- * Share Your App with Your Workspace
+ * For version 2.0: Share Your App with Your Workspace
  * https://slack.com/oauth/authorize?client_id=3143650568.560770539555&scope=incoming-webhook,chat:write:bot
  */
 passport.use(new SlackStrategy({
@@ -74,11 +74,20 @@ passport.use(new SlackStrategy({
 }, (slackAccessToken, refreshToken, profile, done) => {
   user.slackId = profile.user.id;
   user.slackAccessToken = slackAccessToken;
-  postDatabase(user, "user", "post").then( (result) => {
-    done(null, result.data);
+
+  postDatabase(user, "user", "get").then( (result) => {
+    user.organizations = result.data.organizations;
+    user.notifications = result.data.notifications;
+    postDatabase(user, "user", "post").then( (result) => {
+      done(null, result.data);
+    }).catch ( (err)=> {
+      done(new Error("Could not save to db, slack"), profile);
+    } )
   }).catch ( (err)=> {
     done(new Error("Could not save to db, slack"), profile);
   } )
+
+  
 }
 ));
 

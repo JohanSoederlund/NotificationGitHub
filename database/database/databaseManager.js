@@ -56,7 +56,7 @@ function saveNewUser(user) {
                 })
             } else {
                 updateUser(user, existingUser).then ( (res)=> {
-                    resolve({value: res.value, success: true});
+                    resolve({value: res.value, success: false});
                 });
             }
         })
@@ -119,6 +119,7 @@ function deleteNotifications(user) {
             user.notifications = [];
             updateUser(user)
             .then((user) => {
+                //console.log(user);
                 resolve({value: user, success: true});
             })
             .catch((error) => {

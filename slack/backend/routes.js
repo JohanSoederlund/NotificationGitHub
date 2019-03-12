@@ -51,7 +51,7 @@ router.post("/dashboardpayload", async function (ctx) {
   else if ("commits" in data) type = "commit";
 
   //check user settings if event should be posted to slack
-  if (findInArray(user.organizations, data.repository.hooks_url, type)) {
+  if (findInArray(user.organizations, data, type)) {
     postSlack(user.slackAccessToken, data).then( (res) => {})
     .catch( (err) => {
       console.log(err);
@@ -60,12 +60,19 @@ router.post("/dashboardpayload", async function (ctx) {
   ctx.body = {};
 });
 
-function findInArray(organizations, hooks_url, type) {
+function findInArray(organizations, data, type) {
   var found = false;
+  
   organizations.forEach( (org) =>  {
     org.hooks.forEach( (hook) =>  {
-      if (hook === hooks_url && org[type]) {
-        found = true;
+      if (data.organization !== undefined) {
+        if (data.organization.login === org.name && org[type]) {
+          found = true;
+        }
+      } else {
+        if (hook === data.repository.hooks_url && org[type]) {
+          found = true;
+        }
       }
     });
   })

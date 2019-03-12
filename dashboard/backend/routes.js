@@ -12,7 +12,7 @@ const router = new Router();
 
 var clients = {};
 websocket.io.on('connection', (client) => {
-
+  
   client.on('getUser', token => { 
     var decoded = jwt.verify(token, SECRET);
     clients[decoded.username] = client.id;
@@ -41,7 +41,6 @@ router.post("/webhook", async function (ctx) {
   ctx.response.status = 200;
   let data = ctx.request.body;
   if (data.organization === undefined) {
-
     requestPromise.postDatabase({username: data.repository.owner.login}, "user", "get").then( (user) => {
       if (clients.hasOwnProperty(data.repository.owner.login)) sendToDashboard(data.repository.owner.login, data);
       else sendToSlack(user.data, data);
@@ -49,12 +48,13 @@ router.post("/webhook", async function (ctx) {
     
   } else {
     requestPromise.postDatabase({}, "users", "get").then( (users) => {
-  
       users.data.forEach(user => {
-        if (user.organizations.includes(data.organization.login)) {
-          if (clients.hasOwnProperty(user.username)) sendToDashboard(user.username, data);
-          else sendToSlack(user, data);
-        }
+        user.organizations.forEach( (org) => {
+          if (org.name === data.organization.login) {
+            if (clients.hasOwnProperty(user.username)) sendToDashboard(user.username, data);
+            else sendToSlack(user, data);
+          }
+        })
       });
     }).catch((err)=> {
       console.log(err);
@@ -65,9 +65,9 @@ router.post("/webhook", async function (ctx) {
 
 function sendToDashboard(username, data) {
   if ("issue" in data) {
-    websocket.io.sockets.clients().sockets[clients[username]].emit("issue", createIssue(data));
+    websocket.io.sockets.clients().sockets[clients[username]].emit("notification", createIssue(data));
   } else if ("commits" in data) {
-    websocket.io.sockets.clients().sockets[clients[username]].emit("commit", createCommit(data) );
+    websocket.io.sockets.clients().sockets[clients[username]].emit("notification", createCommit(data) );
   }
 }
 
@@ -75,7 +75,11 @@ function sendToSlack(user, data) {
   if (user.notifications === undefined) {
     user.notifications = [];
   }
-  user.notifications.push(createIssue(data));
+  if ("issue" in data) {
+    user.notifications.push(createIssue(data));
+  } else if ("commits" in data) {
+    user.notifications.push(createCommit(data));
+  }
   
   requestPromise.postDatabase(user, "user", "post").then( (user) => {
   }).catch( (err) => {
@@ -101,7 +105,8 @@ function createIssue(data) {
     buttonVariant: 'contained',
     html_url: data.issue.html_url,
     avatar_url: data.issue.user.avatar_url+".jpg",
-    created_at: new Date(data.issue.created_at).toUTCString()
+    created_at: new Date(data.issue.created_at).toUTCString(),
+    organization: data.repository.owner.login
   }
 }
 
@@ -118,7 +123,8 @@ function createCommit(data) {
     buttonVariant: 'contained',
     html_url: data.commits[0].url,
     avatar_url: data.sender.avatar_url+".jpg",
-    created_at: new Date(data.commits[0].timestamp).toUTCString()
+    created_at: new Date(data.commits[0].timestamp).toUTCString(),
+    organization: data.repository.owner.login
   }
 }
 

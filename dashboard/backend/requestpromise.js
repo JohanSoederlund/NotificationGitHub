@@ -27,7 +27,6 @@ function getOrganizations(username) {
     return new Promise((resolve, reject) => {
         postDatabase({ username: username }, "user", "get").then( (user) => {
             var options = getOptions("GET", user.data, "https://api.github.com/user/orgs");
-            
             rp(options)
             .then(function (orgResponse) {
                 
@@ -136,7 +135,6 @@ function postSlack(user, url, method) {
             resolve(res);
         })
         .catch((error) => {
-            console.log(error);
             reject(error);
         })
         

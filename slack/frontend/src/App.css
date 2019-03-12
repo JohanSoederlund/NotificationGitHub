@@ -68,3 +68,24 @@ h4 {
   width: 40%;
   display: inline-block;
 }
+
+.navLink:visited, .navLink:link  {
+  font-size: calc(3px + 6vmin);
+  color: rgb(34, 32, 32, 0.7);
+}
+
+.navLink:hover  {
+  font-size: calc(3px + 6vmin);
+  color: rgb(34, 32, 32, 1);
+}
+
+.split1 {
+  display: inline-block;    
+  width: 30%;
+  float:left;
+}
+.split2 {
+  display: inline-block;    
+  width: calc(6px + 12vmin);
+  float:right;
+}

@@ -84,6 +84,13 @@ class App extends Component {
         <header className="App-header">
           <h1>Notification Hub</h1>
         </header>
+
+        <div className="topBar">
+          <div className="split2">
+            <a className="navLink" href="https://83.250.202.129/settings/">⚙️</a>
+            <a className="navLink" href="https://83.250.202.129/dashboard">📋</a>
+          </div>
+        </div>
         
         <div className="settings">
           <h2>Settings for Slack notifications</h2>
