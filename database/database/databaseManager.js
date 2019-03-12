@@ -80,7 +80,7 @@ function updateUser(user, existingUser) {
         if ('notifications' in user && user.notifications !== undefined) usr.notifications = user.notifications;
         if ('organizations' in user && user.organizations !== undefined) usr.organizations = user.organizations;
         else usr.organizations = existingUser.organizations;
-       
+
         UserModel.findOneAndUpdate({username: user.username}, usr, option, (err, updated) => {
             if (err) reject(err);
             resolve({value: updated, success: true});

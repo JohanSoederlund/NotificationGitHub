@@ -2,7 +2,7 @@
 
 const mongoose = require('mongoose');
 
-let userSchema = new mongoose.Schema({
+let notificationHubUserSchema = new mongoose.Schema({
     githubId: { type: String, required: true },
     username: { type: String, required: true },
     githubAccessToken: { type: String, required: true },
@@ -12,6 +12,6 @@ let userSchema = new mongoose.Schema({
     notifications: { type: Object }
   });
 
-let User = mongoose.model('User', userSchema);
+let NotificationHubUser = mongoose.model('NotificationHubUser', notificationHubUserSchema);
 
-module.exports = User;
+module.exports = NotificationHubUser;
