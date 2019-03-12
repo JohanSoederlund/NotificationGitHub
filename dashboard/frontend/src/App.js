@@ -8,6 +8,9 @@ import 'react-dropdown/style.css'
 
 import Notification from './Notification'
 
+const settingsURL = "https://13.53.201.101/settings/"
+const dashboardURL = "https://13.53.201.101/dashboard/"
+
 class App extends Component {
 
   constructor(props) {
@@ -85,8 +88,8 @@ class App extends Component {
             {dropDown}
           </div>
           <div className="split2">
-            <a className="navLink" href="https://83.250.202.129/settings/">⚙️</a>
-            <a className="navLink" href="https://83.250.202.129/dashboard">📋</a>
+            <a className="navLink" href={settingsURL}>⚙️</a>
+            <a className="navLink" href={dashboardURL}>📋</a>
           </div>
         </div>
 
