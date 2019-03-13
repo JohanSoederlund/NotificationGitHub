@@ -33,7 +33,7 @@ app.use(async (ctx, next) => {
 
 app.use(router.router.routes()).use(router.router.allowedMethods());
 
-app.listen(process.env.PORT || 3009);
+app.listen(3009);
 
 const axios = require('axios');
 

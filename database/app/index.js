@@ -36,4 +36,4 @@ app.use(async (ctx, next) => {
 
 app.use(router.router.routes()).use(router.router.allowedMethods());
 
-app.listen(process.env.PORT || 3010);
+app.listen(3010);
