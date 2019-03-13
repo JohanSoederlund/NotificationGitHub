@@ -45,7 +45,6 @@ router.post("/webhook", async function (ctx) {
       if (clients.hasOwnProperty(data.repository.owner.login)) sendToDashboard(data.repository.owner.login, data);
       else sendToSlack(user.data, data);
     })
-    
   } else {
     requestPromise.postDatabase({}, "users", "get").then( (users) => {
       users.data.forEach(user => {

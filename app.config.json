@@ -1,0 +1,33 @@
+{
+    apps : [
+      {
+        name      : "authentication",
+        script    : "PORT=3004 /home/ubuntu/notificationhub/js223zs-examination/authentication/index.js"
+      },
+      {
+        name      : "database",
+        script    : "PORT=3010 /home/ubuntu/notificationhub/js223zs-examination/database/app/index.js"
+      },
+      {
+        name      : "dashboard-server",
+        script    : "PORT=3001 /home/ubuntu/notificationhub/js223zs-examination/dashboard/backend/index.js"
+      },
+      {
+        name      : "slack-server",
+        script    : "PORT=3009 /home/ubuntu/notificationhub/js223zs-examination/slack/backend/index.js"
+      },
+      {
+        name      : "dashboard-client",
+        script    : "npx",
+        interpreter: "none",
+        args: "PORT=3002 serve -s /home/ubuntu/notificationhub/js223zs-examination/dashboard/frontend/build"
+      },
+      {
+        name      : "slack-client",
+        script    : "npx",
+        interpreter: "none",
+        args: "PORT=3008 serve -s /home/ubuntu/notificationhub/js223zs-examination/slack/frontend/build"
+      }
+    ]
+  }
+
