@@ -5,7 +5,10 @@ const mongoose =require('mongoose');
 const UserModel = require('../database/userModel');
 
 const connectionString = 'mongodb://localhost:27017';
-   
+
+/**
+ * Connects to mongodb database.
+ */
 function connectDatabase() {
     //mongoose.connect(connectionString, { useNewUrlParser: true })
     mongoose.connect(connectionString)
@@ -27,6 +30,10 @@ function disconnectDatabase() {
     })
 }
 
+/**
+ * For examination purposes, drops database collection.
+ * @param {string} collection 
+ */
 function dropCollection(collection) {
     return new Promise((resolve, reject) => {
         mongoose.connection.db.dropCollection( collection )
@@ -39,6 +46,10 @@ function dropCollection(collection) {
     });
 }
 
+/**
+ * Saves new user to database or updates existing user.
+ * @param {Object} user 
+ */
 function saveNewUser(user) {
     return new Promise((resolve, reject) => {
         if (user.organizations === undefined) {
@@ -66,6 +77,11 @@ function saveNewUser(user) {
     });
 }
 
+/**
+ * Updates existing user.
+ * @param {Object} user 
+ * @param {Object} existingUser 
+ */
 function updateUser(user, existingUser) {
     return new Promise((resolve, reject) => {
         
@@ -88,6 +104,10 @@ function updateUser(user, existingUser) {
     });
 }
 
+/**
+ * Find and return ONE existing user.
+ * @param {Object} user 
+ */
 function findUser(user) {
     return new Promise((resolve, reject) => {
         UserModel.findOne(user)
@@ -100,6 +120,9 @@ function findUser(user) {
     });
 }
 
+/**
+ * Returns all users from database.
+ */
 function findUsers() {
     return new Promise((resolve, reject) => {
         UserModel.find({})
@@ -112,6 +135,9 @@ function findUsers() {
     });
 }
 
+/**
+ * Removes old notifications from a user profile.
+ */
 function deleteNotifications(user) {
     return new Promise((resolve, reject) => {
         UserModel.findOne({username: user.username})
@@ -119,7 +145,6 @@ function deleteNotifications(user) {
             user.notifications = [];
             updateUser(user)
             .then((user) => {
-                //console.log(user);
                 resolve({value: user, success: true});
             })
             .catch((error) => {

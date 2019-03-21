@@ -10,9 +10,18 @@ const SECRET = process.env.SECRET;
 
 const router = new Router();
 
+//Every active client
 var clients = {};
+
+/**
+ * New client connections.
+ */
 websocket.io.on('connection', (client) => {
 
+  /**
+   * Client fetches connected user.
+   * jwt is verified for security.
+   */
   client.on('getUser', token => { 
     var decoded = jwt.verify(token, SECRET);
     clients[decoded.username] = client.id;
@@ -24,7 +33,11 @@ websocket.io.on('connection', (client) => {
     
   });
 
+  /**
+   * Client fetches user-settings.
+   */
   client.on('settings', user => { 
+    jwt.verify(user.token, SECRET);
     postDatabase(user, "user", "post").then( (res) => {
       client.emit("user", res.data);
     }).catch((err) => {
@@ -42,6 +55,9 @@ websocket.io.on('connection', (client) => {
   });
 });
 
+/**
+ * Payload from internal api call, originally from GitHub webhook.
+ */
 router.post("/dashboardpayload", async function (ctx) {
   ctx.response.status = 200;
   let user = ctx.request.body.user.user;
@@ -60,6 +76,12 @@ router.post("/dashboardpayload", async function (ctx) {
   ctx.body = {};
 });
 
+/**
+ * Checks that user-settigs match url and type
+ * @param {Array} organizations 
+ * @param {Object} data payload data
+ * @param {string} type payload type
+ */
 function findInArray(organizations, data, type) {
   var found = false;
   
@@ -79,6 +101,12 @@ function findInArray(organizations, data, type) {
   return found;
 }
 
+/**
+ * Internal api call to update or fetch a user.
+ * @param {Object} user 
+ * @param {string} url 
+ * @param {string} method 
+ */
 function postDatabase(user, url, method) {
     return new Promise((resolve, reject) => {
         axios({
@@ -92,13 +120,17 @@ function postDatabase(user, url, method) {
             resolve(res);
         })
         .catch((error) => {
-            console.log(error);
             reject(error);
         })
         
     });
 }
 
+/**
+ * Post a message to Slack application through slackbot channel.
+ * @param {string} accessToken 
+ * @param {object} data 
+ */
 function postSlack(accessToken, data) {
   return new Promise((resolve, reject) => {
     let message = "";

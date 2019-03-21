@@ -5,6 +5,12 @@ const axios = require('axios');
 const SECRET = process.env.SECRET;
 const URL = process.env.URL;
 
+/**
+ * Creates a webhook or an api call with options based on verb, user-profile and url.
+ * @param {string} method 
+ * @param {Object} user 
+ * @param {string} url 
+ */
 function createHook(method, user, url) {
 
     var options = getOptions(method, user, url, ["issues", "push"]);
@@ -21,7 +27,10 @@ function createHook(method, user, url) {
 }
 
 /**
- * 
+ * Fetches organizations.
+ * Sets up new hooks.
+ * Updates user profile.
+ * @param {string} username 
  */
 function getOrganizations(username) {
     return new Promise((resolve, reject) => {
@@ -78,12 +87,17 @@ function getOrganizations(username) {
             });
 
         }).catch( (err) => {
-            console.log(err);
+            reject(err);
         })
         
     });
 }
 
+/**
+ * Return the URLs of the webhooks thats not yet set.
+ * @param {Object} user 
+ * @param {Array} repos 
+ */
 function findInArray(user, repos) {
     let missingHooks = [];
 
@@ -104,6 +118,12 @@ function findInArray(user, repos) {
     return missingHooks;
 }
 
+/**
+ * Post an updated user profile to the internal database api.
+ * @param {Object} user 
+ * @param {string} url 
+ * @param {string} method 
+ */
 function postDatabase(user, url, method) {
     return new Promise((resolve, reject) => {
         axios({
@@ -122,6 +142,12 @@ function postDatabase(user, url, method) {
     });
 }
 
+/**
+ * Post a payload to the internal slack api.
+ * @param {Object} user 
+ * @param {string} url 
+ * @param {string} method 
+ */
 function postSlack(user, url, method) {
     return new Promise((resolve, reject) => {
         axios({
@@ -141,6 +167,13 @@ function postSlack(user, url, method) {
     });
 }
 
+/**
+ * Options for GitHub api calls (webhooks, organizations and repositories fetches)
+ * @param {string} method 
+ * @param {Object} user 
+ * @param {string} url 
+ * @param {Array} events 
+ */
 function getOptions(method, user, url, events) {
     return {
         method: method,

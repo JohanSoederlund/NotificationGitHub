@@ -28,6 +28,7 @@ app.use(function(ctx, next){
     });
 });
 
+//Middle ware for headers.
 app.use(async (ctx, next) => {
     ctx.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, HEAD');
     ctx.set({accept: 'application/json'});

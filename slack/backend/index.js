@@ -25,6 +25,7 @@ app.use(function(ctx, next){
     });
 });
 
+//middle ware for headers
 app.use(async (ctx, next) => {
     ctx.set('Access-Control-Allow-Methods', 'GET, POST');
     ctx.set({accept: 'application/json'});

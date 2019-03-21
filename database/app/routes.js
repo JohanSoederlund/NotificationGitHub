@@ -7,10 +7,11 @@ const jwt = require('jsonwebtoken');
 const DatabaseManager = require("../database/databaseManager");
 const UserModel = require("../database/userModel");
 
-const SECRET = process.env.SECRET;
-
 const router = new Router();
 
+/**
+ * Internal api route for a user.
+ */
 router.get("/user", async function (ctx) {
     try {
         await DatabaseManager.findUser({username: ctx.request.body.user.username})
@@ -23,13 +24,15 @@ router.get("/user", async function (ctx) {
             }
         })
     } catch (error) {
-        console.log(error);
         ctx.response.status = 400;
         ctx.body = error;
     }
     
 });
 
+/**
+ * Internal api route to save new or update a user.
+ */
 router.post("/user", async function (ctx) {
     try {
         let usr = ctx.request.body.user;
@@ -54,6 +57,9 @@ router.post("/user", async function (ctx) {
     }
 });
 
+/**
+ * Internal api route to delete old notifications from a user.
+ */
 router.delete("/user", async function (ctx) {
     try {
         let usr = ctx.request.body.user;
@@ -79,6 +85,9 @@ router.delete("/user", async function (ctx) {
     }
 });
 
+/**
+ * Internal api route to get all users.
+ */
 router.get("/users", async function (ctx) {
     try {
         await DatabaseManager.findUsers()

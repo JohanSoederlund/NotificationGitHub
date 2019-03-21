@@ -10,9 +10,18 @@ const SECRET = process.env.SECRET;
 
 const router = new Router();
 
+//Every active client
 var clients = {};
+
+/**
+ * New client connections.
+ */
 websocket.io.on('connection', (client) => {
   
+  /**
+   * Client fetches connected user.
+   * jwt is verified for security.
+   */
   client.on('getUser', token => { 
     var decoded = jwt.verify(token, SECRET);
     clients[decoded.username] = client.id;

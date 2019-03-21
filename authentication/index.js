@@ -49,8 +49,15 @@ app.use(passport.session({
   }
 }));
 
+//NotificationGitHub user profile
 var user;
 
+/**
+ * GitHub passport strategy for oAuth
+ * clientID: ID of this application registered to GitHub, clientSecret: for validation on GitHubs side,
+ * callbackURL: URL to redirect user, scope: delegation.
+ * callback: to retrieve token and profile from GitHub.
+ */
 passport.use(new GitHubStrategy({
   clientID: GITHUB_CLIENT_ID,
   clientSecret: GITHUB_CLIENT_SECRET,
@@ -66,6 +73,10 @@ function(githubAccessToken, refreshToken, profile, cb) {
 /**
  * For version 2.0: Share Your App with Your Workspace
  * https://slack.com/oauth/authorize?client_id=3143650568.560770539555&scope=incoming-webhook,chat:write:bot
+ * 
+ * Slack passport strategy for oAuth
+ * clientID: ID of this application registered to Slack, clientSecret: for validation on Slacks side, scope: delegation.
+ * callback: to retrieve token and profile from Slack.
  */
 passport.use(new SlackStrategy({
   clientID: SLACK_CLIENT_ID,
@@ -91,10 +102,12 @@ passport.use(new SlackStrategy({
 }
 ));
 
+//Initail session middleware for passport
 passport.serializeUser(function(user, cb) {
   cb(null, user);
 });
 
+//Initail session middleware for passport
 passport.deserializeUser(function(obj, cb) {
   cb(null, obj);
 });
@@ -111,21 +124,33 @@ app.use(function(ctx, next){
     });
 });
 
-
+//Middleware for headers.
 app.use(async (ctx, next) => {
     ctx.set('Access-Control-Allow-Methods', 'GET, POST');
     ctx.set({accept: 'application/json'});
     await next();
 })
 
+/**
+ * Login route for application users.
+ */
 router.get("/login", passport.authenticate('github'));
 
+/**
+ * Redirect path for logged in users.
+ */
 router.get("/auth", passport.authenticate('github'), async function (ctx) {
     ctx.redirect('https://'+URL+'/auth/slack');
 });
 
+/**
+ * Slack verification route for users.
+ */
 router.get('/auth/slack', passport.authorize('slack'));
 
+/**
+ * Redirect path for verified delegation from Slack users.
+ */
 router.get('/auth/slack/callback', 
   passport.authorize('slack', { failureRedirect: '/auth/slack' }), async function (ctx) {
     var token = jwt.sign({ username: user.username }, SECRET, {expiresIn: "1d"});
@@ -138,7 +163,7 @@ app.use(router.routes()).use(router.allowedMethods());
 app.listen(process.env.PORT || 3004);
 
 /**
- * Helper API functions
+ * Helper API function, post to internal database api.
  * @param {signed in user} user 
  * @param {database server sub-url} url 
  */
